@@ -1,0 +1,4 @@
+# Specify code owners for automatic review assignment. Replace with actual GitHub usernames or teams.
+/backend/ @backend-team
+/frontend/ @frontend-team
+/*.py @ml-team

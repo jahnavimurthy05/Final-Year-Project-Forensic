@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+env/
+venv/
+env.bak/
+.venv/
+*.env
+
+# PyTorch checkpoints
+*.pth
+
+# Node
+node_modules/
+dist/
+build/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+backend/node_modules/
+backend/venv/
+backend/checkpoints/
+backend/models/
+backend/data/
+backend/datasets/
