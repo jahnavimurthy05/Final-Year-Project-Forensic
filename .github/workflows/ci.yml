@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install Python requirements (if present)
+        run: |
+          if [ -f backend/ml_requirements.txt ]; then pip install -r backend/ml_requirements.txt; fi
+      - name: Install Node deps (if present)
+        run: |
+          if [ -f package.json ]; then npm ci; fi
+      - name: Run a placeholder check
+        run: echo "CI configured — add tests to run here"
