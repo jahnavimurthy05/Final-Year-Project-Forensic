@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
-    sys.path.append(str(ROOT_DIR))
+    sys.path.insert(0, str(ROOT_DIR))
 
 from ai_models.cgan import CELEBA_CONDITION_DIM, Discriminator, Generator, weights_init
 from datasets.celeba_traits_dataset import get_celeba_dataloader
@@ -30,6 +30,11 @@ def parse_args():
     parser.add_argument("--beta1", type=float, default=0.5)
     parser.add_argument("--num-workers", type=int, default=2)
     parser.add_argument("--sample-every", type=int, default=1)
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Continue training from checkpoint-dir/training_state.pth if it exists.",
+    )
     parser.add_argument(
         "--max-batches",
         type=int,
@@ -72,6 +77,25 @@ def train():
     optimizer_g = optim.Adam(generator.parameters(), lr=args.lr, betas=(args.beta1, 0.999))
     optimizer_d = optim.Adam(discriminator.parameters(), lr=args.lr, betas=(args.beta1, 0.999))
 
+    state_path = checkpoint_dir / "training_state.pth"
+    generator_path = checkpoint_dir / "generator.pth"
+    discriminator_path = checkpoint_dir / "discriminator.pth"
+    start_epoch = 1
+    if args.resume and state_path.exists():
+        state = torch.load(state_path, map_location=device)
+        generator.load_state_dict(state["generator"])
+        discriminator.load_state_dict(state["discriminator"])
+        optimizer_g.load_state_dict(state["optimizer_g"])
+        optimizer_d.load_state_dict(state["optimizer_d"])
+        start_epoch = int(state.get("epoch", 0)) + 1
+        print(f"Resuming training from epoch {start_epoch}")
+    elif args.resume and generator_path.exists() and discriminator_path.exists():
+        generator.load_state_dict(torch.load(generator_path, map_location=device))
+        discriminator.load_state_dict(torch.load(discriminator_path, map_location=device))
+        print("Resuming from generator.pth and discriminator.pth without optimizer state.")
+    elif args.resume:
+        print(f"No resume state found at {state_path}; starting fresh.")
+
     fixed_noise = torch.randn(16, args.latent_dim, device=device)
     fixed_conditions = torch.zeros(16, CELEBA_CONDITION_DIM, device=device)
     fixed_conditions[:, 0] = 1.0
@@ -87,8 +111,9 @@ def train():
     }
     (checkpoint_dir / "cgan_config.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
 
-    for epoch in range(1, args.epochs + 1):
-        progress = tqdm(dataloader, desc=f"Epoch {epoch}/{args.epochs}", leave=False)
+    end_epoch = start_epoch + args.epochs - 1
+    for epoch in range(start_epoch, end_epoch + 1):
+        progress = tqdm(dataloader, desc=f"Epoch {epoch}/{end_epoch}", leave=False)
         last_loss_g = 0.0
         last_loss_d = 0.0
 
@@ -139,6 +164,17 @@ def train():
 
         torch.save(generator.state_dict(), checkpoint_dir / "generator.pth")
         torch.save(discriminator.state_dict(), checkpoint_dir / "discriminator.pth")
+        torch.save(
+            {
+                "epoch": epoch,
+                "generator": generator.state_dict(),
+                "discriminator": discriminator.state_dict(),
+                "optimizer_g": optimizer_g.state_dict(),
+                "optimizer_d": optimizer_d.state_dict(),
+                "config": config,
+            },
+            state_path,
+        )
 
 
 if __name__ == "__main__":

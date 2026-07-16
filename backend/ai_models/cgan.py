@@ -21,7 +21,8 @@ def encode_celeba_traits(traits, device=None):
     age_range = str(traits.get("ageRange", "")).strip().lower()
     hair_color = str(traits.get("hairColor", "")).strip().lower()
     cheekbones = str(traits.get("cheekboneShape", "")).strip().lower()
-    nose = str(traits.get("noseShape", "")).strip().lower()
+    nose = str(traits.get("noseShape", "")
+    ).strip().lower()
     lips = str(traits.get("lipShape", "")).strip().lower()
 
     values = [
@@ -41,8 +42,8 @@ def encode_celeba_traits(traits, device=None):
 class Generator(nn.Module):
     def __init__(self, latent_dim=100, condition_dim=CELEBA_CONDITION_DIM, image_size=64):
         super().__init__()
-        if image_size != 64:
-            raise ValueError("This starter CGAN currently supports image_size=64.")
+        if image_size not in {64, 128}:
+            raise ValueError("This starter CGAN currently supports image_size=64 or image_size=128.")
 
         self.latent_dim = latent_dim
         self.condition_dim = condition_dim
@@ -54,19 +55,33 @@ class Generator(nn.Module):
             nn.ReLU(True),
         )
 
-        self.model = nn.Sequential(
-            nn.ConvTranspose2d(512, 256, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(256),
-            nn.ReLU(True),
-            nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(128),
-            nn.ReLU(True),
-            nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(64),
-            nn.ReLU(True),
-            nn.ConvTranspose2d(64, 3, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.Tanh(),
+        channels = [512, 256, 128, 64]
+        if image_size == 128:
+            channels.append(32)
+
+        layers = []
+        for in_channels, out_channels in zip(channels, channels[1:]):
+            layers.extend(
+                [
+                    nn.ConvTranspose2d(
+                        in_channels,
+                        out_channels,
+                        kernel_size=4,
+                        stride=2,
+                        padding=1,
+                        bias=False,
+                    ),
+                    nn.BatchNorm2d(out_channels),
+                    nn.ReLU(True),
+                ]
+            )
+        layers.extend(
+            [
+                nn.ConvTranspose2d(channels[-1], 3, kernel_size=4, stride=2, padding=1, bias=False),
+                nn.Tanh(),
+            ]
         )
+        self.model = nn.Sequential(*layers)
 
     def forward(self, noise, conditions):
         x = torch.cat((noise, conditions), dim=1)
@@ -77,27 +92,38 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self, condition_dim=CELEBA_CONDITION_DIM, image_size=64):
         super().__init__()
-        if image_size != 64:
-            raise ValueError("This starter CGAN currently supports image_size=64.")
+        if image_size not in {64, 128}:
+            raise ValueError("This starter CGAN currently supports image_size=64 or image_size=128.")
 
         self.condition_dim = condition_dim
         self.image_size = image_size
         self.condition_map = nn.Linear(condition_dim, image_size * image_size)
 
-        self.model = nn.Sequential(
-            nn.Conv2d(4, 64, kernel_size=4, stride=2, padding=1, bias=False),
+        channels = [4, 64, 128, 256, 512]
+        if image_size == 128:
+            channels.insert(1, 32)
+
+        layers = [
+            nn.Conv2d(channels[0], channels[1], kernel_size=4, stride=2, padding=1, bias=False),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(128),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(128, 256, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(256),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(256, 512, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(512),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(512, 1, kernel_size=4, stride=1, padding=0, bias=False),
-        )
+        ]
+        for in_channels, out_channels in zip(channels[1:-1], channels[2:]):
+            layers.extend(
+                [
+                    nn.Conv2d(
+                        in_channels,
+                        out_channels,
+                        kernel_size=4,
+                        stride=2,
+                        padding=1,
+                        bias=False,
+                    ),
+                    nn.BatchNorm2d(out_channels),
+                    nn.LeakyReLU(0.2, inplace=True),
+                ]
+            )
+        layers.append(nn.Conv2d(512, 1, kernel_size=4, stride=1, padding=0, bias=False))
+        self.model = nn.Sequential(*layers)
 
     def forward(self, images, conditions):
         condition_map = self.condition_map(conditions).view(
