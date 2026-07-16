@@ -31,3 +31,7 @@ backend/checkpoints/
 backend/models/
 backend/data/
 backend/datasets/
+backend/generated_faces/**/*.png
+backend/generated_faces/**/*.jpg
+backend/generated_faces/**/*.jpeg
+backend/generated_faces/**/*.zip

@@ -1,11 +1,11 @@
-const SNP_MARKERS = [
+export const SNP_MARKERS = [
   { marker: "rs12913832", alleles: ["AA", "AG", "GG"] },
   { marker: "rs1800407", alleles: ["CC", "CG", "GG"] },
   { marker: "rs16891982", alleles: ["CC", "CG", "GG"] },
   { marker: "rs12896399", alleles: ["TT", "TC", "CC"] },
 ];
 
-const TRAIT_OPTIONS = {
+export const TRAIT_OPTIONS = {
   hairColor: ["Black", "Brown", "Blonde", "Red"],
   eyeColor: ["Brown", "Blue", "Green", "Hazel"],
   faceShape: ["Oval", "Round", "Square", "Heart"],
@@ -25,6 +25,29 @@ export async function generateSyntheticProfile() {
     console.error(`Gemini API failed or was rate limited, falling back to random: ${error.message}`);
     return generateFallbackProfile();
   }
+}
+
+export function normalizeTraits(traits = {}) {
+  const aliases = {
+    eye_color: "eyeColor",
+    hair_color: "hairColor",
+    skin_tone: "skinTone",
+    gender: "sex",
+    cheekbone: "cheekboneStructure",
+    cheekboneShape: "cheekboneStructure",
+    noseShape: "noseStructure",
+    lipShape: "lipStructure",
+  };
+
+  return Object.entries(traits).reduce((normalized, [key, value]) => {
+    if (value === undefined || value === null || value === "") {
+      return normalized;
+    }
+
+    const normalizedKey = aliases[key] || key;
+    normalized[normalizedKey] = String(value).trim().toLowerCase();
+    return normalized;
+  }, {});
 }
 
 async function generateWithGemini() {
