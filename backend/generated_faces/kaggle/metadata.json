@@ -1,0 +1,962 @@
+[
+  {
+    "file": "face_000001.png",
+    "seed": 1,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000002.png",
+    "seed": 2,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "blonde",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000003.png",
+    "seed": 3,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "red",
+      "eyeColor": "brown",
+      "skinTone": "fair",
+      "faceShape": "oval",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000004.png",
+    "seed": 4,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000005.png",
+    "seed": 5,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "red",
+      "eyeColor": "brown",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000006.png",
+    "seed": 6,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "blonde",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000007.png",
+    "seed": 7,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "red",
+      "eyeColor": "brown",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000008.png",
+    "seed": 8,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000009.png",
+    "seed": 9,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000010.png",
+    "seed": 10,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "brown",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000011.png",
+    "seed": 11,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "brown",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000012.png",
+    "seed": 12,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000013.png",
+    "seed": 13,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000014.png",
+    "seed": 14,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "brown",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000015.png",
+    "seed": 15,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "oval",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000016.png",
+    "seed": 16,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "brown",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000017.png",
+    "seed": 17,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000018.png",
+    "seed": 18,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "black",
+      "eyeColor": "brown",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000019.png",
+    "seed": 19,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000020.png",
+    "seed": 20,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "brown",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000021.png",
+    "seed": 21,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "red",
+      "eyeColor": "brown",
+      "skinTone": "olive",
+      "faceShape": "oval",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000022.png",
+    "seed": 22,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000023.png",
+    "seed": 23,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "blonde",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000024.png",
+    "seed": 24,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000025.png",
+    "seed": 25,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "red",
+      "eyeColor": "brown",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000026.png",
+    "seed": 26,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "black",
+      "eyeColor": "brown",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000027.png",
+    "seed": 27,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "black",
+      "eyeColor": "brown",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000028.png",
+    "seed": 28,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "brown",
+      "eyeColor": "brown",
+      "skinTone": "brown",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000029.png",
+    "seed": 29,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "black",
+      "eyeColor": "brown",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000030.png",
+    "seed": 30,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000031.png",
+    "seed": 31,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000032.png",
+    "seed": 32,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "blonde",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000033.png",
+    "seed": 33,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "brown",
+      "eyeColor": "brown",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000034.png",
+    "seed": 34,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000035.png",
+    "seed": 35,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000036.png",
+    "seed": 36,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "brown",
+      "eyeColor": "brown",
+      "skinTone": "olive",
+      "faceShape": "oval",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000037.png",
+    "seed": 37,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "black",
+      "eyeColor": "brown",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000038.png",
+    "seed": 38,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000039.png",
+    "seed": 39,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000040.png",
+    "seed": 40,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "brown",
+      "eyeColor": "brown",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000041.png",
+    "seed": 41,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000042.png",
+    "seed": 42,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "blonde",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000043.png",
+    "seed": 43,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000044.png",
+    "seed": 44,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "brown",
+      "skinTone": "fair",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000045.png",
+    "seed": 45,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "brown",
+      "eyeColor": "brown",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000046.png",
+    "seed": 46,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000047.png",
+    "seed": 47,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "fair",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000048.png",
+    "seed": 48,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "oval",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000049.png",
+    "seed": 49,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "blonde",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000050.png",
+    "seed": 50,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000051.png",
+    "seed": 51,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000052.png",
+    "seed": 52,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000053.png",
+    "seed": 53,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "blonde",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000054.png",
+    "seed": 54,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000055.png",
+    "seed": 55,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "blonde",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000056.png",
+    "seed": 56,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000057.png",
+    "seed": 57,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "red",
+      "eyeColor": "brown",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000058.png",
+    "seed": 58,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000059.png",
+    "seed": 59,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000060.png",
+    "seed": 60,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "red",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "oval",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000061.png",
+    "seed": 61,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "olive",
+      "faceShape": "round",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000062.png",
+    "seed": 62,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "brown",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "wide",
+      "lipStructure": "full"
+    }
+  },
+  {
+    "file": "face_000063.png",
+    "seed": 63,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "male",
+      "hairColor": "brown",
+      "eyeColor": "brown",
+      "skinTone": "medium",
+      "faceShape": "oval",
+      "cheekboneStructure": "soft",
+      "noseStructure": "wide",
+      "lipStructure": "thin"
+    }
+  },
+  {
+    "file": "face_000064.png",
+    "seed": 64,
+    "model": "stylegan2-ada-ffhq",
+    "traits": {
+      "sex": "female",
+      "hairColor": "blonde",
+      "eyeColor": "hazel",
+      "skinTone": "medium",
+      "faceShape": "round",
+      "cheekboneStructure": "high",
+      "noseStructure": "straight",
+      "lipStructure": "full"
+    }
+  }
+]

@@ -54,14 +54,33 @@ export function loadFaceGallery(galleryDir) {
 }
 
 export function selectGalleryFaces(gallery, requestedTraits, count = 4) {
-  return gallery
-    .map((face) => ({
+  const traitHash = getTraitHash(requestedTraits);
+  
+  const scored = gallery.map((face, index) => {
+    const score = scoreTraits(face.traits || {}, requestedTraits || {});
+    // Add deterministic micro-offset derived from requestedTraits hash & face index
+    const tieBreaker = (Math.sin(traitHash + index * 1.618) + 1) * 0.1;
+    return {
       ...face,
-      score: scoreTraits(face.traits || {}, requestedTraits || {}),
-    }))
+      score: score + tieBreaker,
+    };
+  });
+
+  return scored
     .sort((a, b) => b.score - a.score)
     .slice(0, count);
 }
+
+function getTraitHash(traits) {
+  const str = JSON.stringify(traits || {});
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
 
 export function encodeImageAsDataUrl(imagePath) {
   const ext = path.extname(imagePath).toLowerCase();
