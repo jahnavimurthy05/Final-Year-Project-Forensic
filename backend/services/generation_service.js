@@ -30,9 +30,14 @@ const kaggleGalleryDir = path.resolve(
   process.env.KAGGLE_FACE_GALLERY_DIR || path.join(backendDir, "generated_faces", "kaggle")
 );
 
-export async function orchestrateFaceGeneration(inputData = {}) {
+// StyleGAN2 live generation is CPU-minutes-per-image without a CUDA GPU, so it's opt-in only.
+// Unset/false (the default) skips straight to the fast, pre-rendered Kaggle gallery.
+const styleganEnabled = String(process.env.ENABLE_STYLEGAN || "").toLowerCase() === "true";
+const styleganImageCount = Math.max(1, Number(process.env.STYLEGAN_IMAGE_COUNT) || 1);
+
+export async function orchestrateFaceGeneration(inputData = {}, { signal } = {}) {
   // 1. Predict HIrisPlex-S phenotype traits & probabilities
-  const phenotypePrediction = await predictPhenotypeFromSnp(inputData).catch(() => ({
+  const phenotypePrediction = await predictPhenotypeFromSnp(inputData, signal).catch(() => ({
     traits: normalizeTraits(inputData.traits || inputData),
     probabilities: {},
     metadata: { note: "Fallback to default normalization" },
@@ -49,42 +54,45 @@ export async function orchestrateFaceGeneration(inputData = {}) {
   };
 
 
-  // 2. StyleGAN2-ADA Latent Generation (Primary Engine)
-  try {
-    const styleganResult = await runStyleganInference(traits);
-    if (styleganResult.status === "success" && styleganResult.variations?.length > 0) {
-      // 3. Post-Processing: MediaPipe Landmark-based Iris Recoloring
-      const { variations, postProcessing } = await applyPostProcessing(
-        styleganResult.variations,
-        traits
-      );
-      const confidenceScores = variations.map(() => (88 + Math.random() * 10).toFixed(1));
+  // 2. StyleGAN2-ADA Latent Generation (opt-in primary engine — see ENABLE_STYLEGAN above)
+  if (styleganEnabled) {
+    try {
+      const styleganResult = await runStyleganInference(traits, signal);
+      if (styleganResult.status === "success" && styleganResult.variations?.length > 0) {
+        // 3. Post-Processing: MediaPipe Landmark-based Iris Recoloring
+        const { variations, postProcessing } = await applyPostProcessing(
+          styleganResult.variations,
+          traits,
+          signal
+        );
+        const confidenceScores = variations.map(() => (88 + Math.random() * 10).toFixed(1));
 
-      return {
-        status: "success",
-        variations,
-        metadata: {
-          traits_used: traits,
-          hirisplex_probabilities: phenotypeMetadata.probabilities,
-          model: "stylegan2-ada-ffhq",
-          stylegan_edits: styleganResult.metadata,
-          confidence_scores: confidenceScores,
-          post_processing: postProcessing,
-          forensic_disclaimer:
-            "This composite is a probabilistic phenotypic representation generated via StyleGAN2 W+ latent editing and MediaPipe landmark post-processing.",
-        },
-      };
+        return {
+          status: "success",
+          variations,
+          metadata: {
+            traits_used: traits,
+            hirisplex_probabilities: phenotypeMetadata.probabilities,
+            model: "stylegan2-ada-ffhq",
+            stylegan_edits: styleganResult.metadata,
+            confidence_scores: confidenceScores,
+            post_processing: postProcessing,
+            forensic_disclaimer:
+              "This composite is a probabilistic phenotypic representation generated via StyleGAN2 W+ latent editing and MediaPipe landmark post-processing.",
+          },
+        };
+      }
+    } catch (err) {
+      console.warn("StyleGAN2 pipeline execution skipped/fallback:", err.message);
     }
-  } catch (err) {
-    console.warn("StyleGAN2 pipeline execution skipped/fallback:", err.message);
   }
 
-  // 3. Fallback: Kaggle Dataset Gallery Matching + MediaPipe Iris Recoloring
+  // 3. Fallback (default): Kaggle Dataset Gallery Matching + MediaPipe Iris Recoloring
   const gallery = loadFaceGallery(kaggleGalleryDir);
   if (gallery.length > 0) {
     const selectedFaces = selectGalleryFaces(gallery, traits, 4);
     const rawVariations = selectedFaces.map((face) => encodeImageAsDataUrl(face.imagePath));
-    const { variations, postProcessing } = await applyPostProcessing(rawVariations, traits);
+    const { variations, postProcessing } = await applyPostProcessing(rawVariations, traits, signal);
     const maxScore = 12;
     const confidenceScores = selectedFaces.map((face) => {
       const rawPct = (face.score / maxScore) * 100;
@@ -110,23 +118,29 @@ export async function orchestrateFaceGeneration(inputData = {}) {
 
 
   throw new Error(
-    "StyleGAN2 model files not found. Please clone stylegan2-ada-pytorch into backend/models/ and download stylegan2-ada-ffhq.pkl into backend/checkpoints/."
+    "No face source available: the Kaggle gallery is empty/missing (backend/generated_faces/kaggle/), " +
+      "and StyleGAN2 live generation is disabled (set ENABLE_STYLEGAN=true, with stylegan2-ada-pytorch " +
+      "cloned into backend/models/ and stylegan2-ada-ffhq.pkl in backend/checkpoints/, to use it instead)."
   );
 }
 
 
 
-function runStyleganInference(traits) {
+function runStyleganInference(traits, signal) {
   return new Promise((resolve, reject) => {
     const jsonInput = JSON.stringify(traits);
-    const child = spawn(pythonPath, [
-      styleganScript,
-      "--traits-json", jsonInput,
-      "--network", styleganNetwork,
-      "--stylegan-repo", styleganRepo,
-      "--directions-dir", latentDirectionsDir,
-      "--count", "4",
-    ]);
+    const child = spawn(
+      pythonPath,
+      [
+        styleganScript,
+        "--traits-json", jsonInput,
+        "--network", styleganNetwork,
+        "--stylegan-repo", styleganRepo,
+        "--directions-dir", latentDirectionsDir,
+        "--count", String(styleganImageCount),
+      ],
+      { signal }
+    );
 
     let stdout = "";
     let stderr = "";
@@ -149,7 +163,7 @@ function runStyleganInference(traits) {
   });
 }
 
-async function applyPostProcessing(variations, traits) {
+async function applyPostProcessing(variations, traits, signal) {
   const targetEyeColor = traits.eyeColor || "blue";
   const targetHairColor = traits.hairColor || "black";
   const targetSkinTone = traits.skinTone || "medium";
@@ -158,7 +172,7 @@ async function applyPostProcessing(variations, traits) {
 
   for (const dataUrl of variations) {
     try {
-      const recolored = await runIrisRecoloring(dataUrl, targetEyeColor, targetHairColor, targetSkinTone);
+      const recolored = await runIrisRecoloring(dataUrl, targetEyeColor, targetHairColor, targetSkinTone, signal);
       processedVariations.push(recolored);
       logs.push({ iris_recolor: "applied", phenotype_adaptation: "applied", landmark_model: "mediapipe_facemesh" });
     } catch (err) {
@@ -171,9 +185,9 @@ async function applyPostProcessing(variations, traits) {
   return { variations: processedVariations, postProcessing: logs };
 }
 
-function runIrisRecoloring(dataUrl, targetEyeColor, targetHairColor, targetSkinTone) {
+function runIrisRecoloring(dataUrl, targetEyeColor, targetHairColor, targetSkinTone, signal) {
   return new Promise((resolve, reject) => {
-    const child = spawn(pythonPath, [irisRecolorScript]);
+    const child = spawn(pythonPath, [irisRecolorScript], { signal });
 
     let stdout = "";
     let stderr = "";
@@ -198,6 +212,13 @@ function runIrisRecoloring(dataUrl, targetEyeColor, targetHairColor, targetSkinT
     });
 
     child.on("error", (err) => reject(err));
+
+    // Killing the child (e.g. via an aborted signal) while we're still writing to its
+    // stdin raises EPIPE/EOF on the stream itself. Without a listener here, that's an
+    // unhandled "error" event on the stdin socket and crashes the whole Node process —
+    // the "error"/"close" handlers above already settle this promise either way, so
+    // just swallow it.
+    child.stdin.on("error", () => {});
 
     const payload = JSON.stringify({
       image_data_url: dataUrl,

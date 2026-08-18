@@ -9,10 +9,10 @@ const projectDir = path.resolve(backendDir, "..");
 const pythonPath = process.env.PYTHON_PATH || path.join(projectDir, ".venv", "Scripts", "python.exe");
 const predictScript = path.join(backendDir, "inference", "predict_traits.py");
 
-export function predictPhenotypeFromSnp(profile = {}) {
+export function predictPhenotypeFromSnp(profile = {}, signal) {
   return new Promise((resolve, reject) => {
     const jsonInput = JSON.stringify(profile);
-    const child = spawn(pythonPath, [predictScript, "--profile-json", jsonInput]);
+    const child = spawn(pythonPath, [predictScript, "--profile-json", jsonInput], { signal });
 
     let stdout = "";
     let stderr = "";
