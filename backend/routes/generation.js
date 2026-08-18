@@ -8,9 +8,19 @@ const router = express.Router();
 
 
 router.get("/generate-synthetic-dna", async (req, res) => {
+  // If the client disconnects/times out mid-request, abort() kills any in-flight
+  // Python subprocess instead of leaving it to run to completion unattended.
+  // NOTE: this must be res.on("close"), not req.on("close") — the request stream
+  // closes as soon as it's fully read (near-instant), which is not the same as the
+  // client going away. res only closes early like that on a genuine disconnect.
+  const controller = new AbortController();
+  res.on("close", () => {
+    if (!res.writableEnded) controller.abort();
+  });
+
   try {
     const profile = await generateSyntheticProfile();
-    const prediction = await predictPhenotypeFromSnp(profile).catch(() => ({
+    const prediction = await predictPhenotypeFromSnp(profile, controller.signal).catch(() => ({
       traits: normalizeTraits(profile.traits || {}),
       probabilities: {},
       metadata: {},
@@ -29,16 +39,20 @@ router.get("/generate-synthetic-dna", async (req, res) => {
     const db = req.app.locals.db;
 
     if (db) {
-      await db.collection("synthetic_dna").insertOne({
-        snpMarkers: enrichedProfile.snpMarkers || [],
-        timestamp: new Date(),
-      });
+      try {
+        await db.collection("synthetic_dna").insertOne({
+          snpMarkers: enrichedProfile.snpMarkers || [],
+          timestamp: new Date(),
+        });
 
-      await db.collection("phenotype_mappings").insertOne({
-        traits: enrichedProfile.traits || {},
-        probabilities: enrichedProfile.probabilities || {},
-        timestamp: new Date(),
-      });
+        await db.collection("phenotype_mappings").insertOne({
+          traits: enrichedProfile.traits || {},
+          probabilities: enrichedProfile.probabilities || {},
+          timestamp: new Date(),
+        });
+      } catch (dbError) {
+        console.warn("generate-synthetic-dna: DB logging skipped:", dbError.message);
+      }
     }
 
     return res.status(200).json(enrichedProfile);
@@ -48,8 +62,19 @@ router.get("/generate-synthetic-dna", async (req, res) => {
 });
 
 router.post("/generate-face", async (req, res) => {
+  // If the client disconnects/times out mid-request, abort() kills any in-flight
+  // Python subprocess (StyleGAN2 generation, iris recoloring) instead of leaving it
+  // to burn CPU to completion unattended.
+  // NOTE: this must be res.on("close"), not req.on("close") — the request stream
+  // closes as soon as it's fully read (near-instant), which is not the same as the
+  // client going away. res only closes early like that on a genuine disconnect.
+  const controller = new AbortController();
+  res.on("close", () => {
+    if (!res.writableEnded) controller.abort();
+  });
+
   try {
-    const result = await orchestrateFaceGeneration(req.body);
+    const result = await orchestrateFaceGeneration(req.body, { signal: controller.signal });
     const auditTrailId = `AUDIT-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
     const enrichedResult = {
@@ -66,13 +91,17 @@ router.post("/generate-face", async (req, res) => {
 
     const db = req.app.locals.db;
     if (db && result.variations) {
-      await db.collection("face_generations").insertOne({
-        auditTrailId,
-        traits: result.metadata?.traits_used || {},
-        model: result.metadata?.model || "stylegan2-ada-ffhq",
-        probabilities: result.metadata?.hirisplex_probabilities || {},
-        timestamp: new Date(),
-      });
+      try {
+        await db.collection("face_generations").insertOne({
+          auditTrailId,
+          traits: result.metadata?.traits_used || {},
+          model: result.metadata?.model || "stylegan2-ada-ffhq",
+          probabilities: result.metadata?.hirisplex_probabilities || {},
+          timestamp: new Date(),
+        });
+      } catch (dbError) {
+        console.warn("generate-face: DB logging skipped:", dbError.message);
+      }
     }
 
     return res.status(200).json(enrichedResult);
