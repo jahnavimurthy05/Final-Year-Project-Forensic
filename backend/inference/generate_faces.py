@@ -1,3 +1,9 @@
+"""
+LEGACY / NOT PART OF THE ACTIVE PIPELINE — see backend/ai_models/cgan.py docstring.
+CLI entry point for the CelebA CGAN prototype (`npm run infer:cgan`), kept for
+reference/reproducibility. The live face-generation route never calls this script.
+"""
+
 import argparse
 import base64
 import io

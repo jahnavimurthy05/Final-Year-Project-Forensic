@@ -1,0 +1,286 @@
+{
+  "_status": "VALIDATED_FROM_SOURCE",
+  "_activation_history": "Originally shipped under a .PENDING_VERIFICATION.json filename (not auto-loaded) after an initial cross-check against this project's Tier 2 EFFECT_ALLELE table found rs12913832 and rs1800407 disagreeing in a way that wasn't a simple strand complement. Resolved by looking up both SNPs directly in dbSNP (NCBI RefSNP API + NCBI Gene coordinates), cross-corroborated against the IrisPlex patent US20110312534A1: rs12913832 is a genuine strand complement (HERC2 is on the minus strand; this file's 'T' = complement of this app's forward 'A'), and rs1800407's real dbSNP alleles are C/T -- this app's hardcoded 'G' (dna_service.js) was never a real base at that locus, just a placeholder symbol that happens to point the correct direction. Both translations are applied via predict_traits.py's _GENOTYPE_DOSAGE_OVERRIDE table (not a blind complement, since the two cases needed different handling) and were verified to reproduce the expected direction against this project's own trusted Tier 2 rules before being activated. rs1393350, rs12203592, rs1042602, and rs683 were flagged as mismatched in the initial pass too but were NOT individually resolved -- this app's SNP generator (dna_service.js SNP_MARKERS) never actually produces genotypes for those SNPs, so they always evaluate as 'missing' regardless of their labelling and cannot silently produce a wrong result. If the app's SNP roster ever expands to include them, they need the same dbSNP-backed treatment before being trusted.",
+  "_source": "Walsh S, Liu F, Wollstein A, et al. 'The HIrisPlex system for simultaneous prediction of hair and eye colour from DNA.' Forensic Sci Int Genet. 2013;7(1):98-115. doi:10.1016/j.fsigen.2012.07.005 -- Supplementary interactive prediction tool (mmc7.xls, sheet 'macro'), downloaded from https://ars.els-cdn.com/content/image/1-s2.0-S1872497312001810-mmc7.xls",
+  "_partial": true,
+  "_warning": "PARTIAL MODEL: eye_color and hair_color are exact published coefficients. skin_color is DELIBERATELY ABSENT -- the deployable 5-category HIrisPlex-S skin model (36 SNPs, its intercepts and per-logit betas) has never been published in any accessible supplementary material and is only executable via the Erasmus MC webtool. No skin numbers were invented. With skin_color missing, predict_traits.py returns all-zero skin probabilities (it does not crash) -- callers must treat skin as unavailable, not as a prediction.",
+  "_verification": "Coefficients reproduce, to 16 significant digits, (a) the source spreadsheet's own computed all-zero-dosage probabilities (hair Brown=0.10293551660404357, Red=0.0013712225851220672, Black=0.0742993898557622; eye Blue=0.9499721894974398, Int=0.02961357022894674, Brown=0.020414240273613493) and (b) a published per-sample result in the same paper's supplementary results file (mmc8.xls row 43: 0.8701562387303197 / 0.07637632609390761 / 0.05346743517577268).",
+  "_dosage_convention": "Each SNP value is the count (0/1/2) of the _effect_allele listed per SNP, exactly as labelled in the 2013 supplementary tool.",
+  "_allele_convention_caveat": "The current HIrisPlex-S webtool input template (https://hirisplex.erasmusmc.nl/examples/hirisplexs.csv) labels rs12896399 as \"rs12896399_T\", while the 2013 supplementary tool that these betas come from labels its effect allele \"G\". G and T are not strand complements, so this is a substantive labelling discrepancy that is NOT resolved here -- verify rs12896399 orientation before relying on it. The other differences (rs12913832 A/T, rs1393350 A/T, rs1800407 T/A between the 2011 and 2013 sheets) are simple strand complements and are harmless.",
+  "_notes": "rs312262906 = MC1R N29insA and rs201326893 = MC1R Y152OCH; rsIDs taken from the official webtool input template, whose column order matches the 2013 tool's SNP order exactly. Reference (baseline) category has all coefficients implicitly 0.",
+  "eye_color": {
+    "_reference_category": "brown",
+    "_source": "Walsh S, Liu F, Wollstein A, et al. 'The HIrisPlex system for simultaneous prediction of hair and eye colour from DNA.' Forensic Sci Int Genet. 2013;7(1):98-115. doi:10.1016/j.fsigen.2012.07.005 -- Supplementary interactive prediction tool (mmc7.xls, sheet 'macro'), downloaded from https://ars.els-cdn.com/content/image/1-s2.0-S1872497312001810-mmc7.xls [sheet \"macro\", rows 51-57] || Cross-checked against FROG-kb (Yale) 'Supplementary Table 4: Interactive macro for IrisPlex eye colour prediction modelling' -- https://frog.med.yale.edu/FrogKB/download/Irisplex_calculation.xls (from Walsh S, et al. Forensic Sci Int Genet. 2011;5(3):170-180). All 6 eye SNP betas and both intercepts are numerically identical between the two sources.",
+    "intercepts": {
+      "blue": 3.8402,
+      "intermediate": 0.372
+    },
+    "snp_coefficients": {
+      "rs12913832": {
+        "blue": -4.8727,
+        "intermediate": -1.99,
+        "_effect_allele": "T"
+      },
+      "rs1800407": {
+        "blue": 1.1536,
+        "intermediate": 1.052,
+        "_effect_allele": "A"
+      },
+      "rs12896399": {
+        "blue": -0.5253,
+        "intermediate": -0.0077,
+        "_effect_allele": "G"
+      },
+      "rs16891982": {
+        "blue": -1.5257,
+        "intermediate": -0.7363,
+        "_effect_allele": "C"
+      },
+      "rs1393350": {
+        "blue": 0.4431,
+        "intermediate": 0.259,
+        "_effect_allele": "T"
+      },
+      "rs12203592": {
+        "blue": 0.5951,
+        "intermediate": 0.6872,
+        "_effect_allele": "T"
+      }
+    }
+  },
+  "hair_color": {
+    "_reference_category": "blonde",
+    "_source": "Walsh S, Liu F, Wollstein A, et al. 'The HIrisPlex system for simultaneous prediction of hair and eye colour from DNA.' Forensic Sci Int Genet. 2013;7(1):98-115. doi:10.1016/j.fsigen.2012.07.005 -- Supplementary interactive prediction tool (mmc7.xls, sheet 'macro'), downloaded from https://ars.els-cdn.com/content/image/1-s2.0-S1872497312001810-mmc7.xls [sheet \"macro\", rows 2-24]",
+    "intercepts": {
+      "brown": -2.0769,
+      "red": -6.3953,
+      "black": -2.4029
+    },
+    "snp_coefficients": {
+      "rs312262906": {
+        "brown": 1.2522,
+        "red": 25.508,
+        "black": 2.732,
+        "_effect_allele": "A"
+      },
+      "rs11547464": {
+        "brown": -0.61155,
+        "red": 2.5381,
+        "black": -16.969,
+        "_effect_allele": "A"
+      },
+      "rs885479": {
+        "brown": 0.2937,
+        "red": -0.20889,
+        "black": 0.39983,
+        "_effect_allele": "T"
+      },
+      "rs1805008": {
+        "brown": -0.50143,
+        "red": 2.801,
+        "black": -0.86062,
+        "_effect_allele": "T"
+      },
+      "rs1805005": {
+        "brown": 0.21172,
+        "red": 0.93493,
+        "black": -0.0029013,
+        "_effect_allele": "T"
+      },
+      "rs1805006": {
+        "brown": 1.9293,
+        "red": 3.65,
+        "black": -16.088,
+        "_effect_allele": "A"
+      },
+      "rs1805007": {
+        "brown": -0.32318,
+        "red": 3.4408,
+        "black": -1.3757,
+        "_effect_allele": "T"
+      },
+      "rs1805009": {
+        "brown": 0.60861,
+        "red": 4.5868,
+        "black": 0.060631,
+        "_effect_allele": "C"
+      },
+      "rs201326893": {
+        "brown": 0.25624,
+        "red": 22.107,
+        "black": 3.9824,
+        "_effect_allele": "A"
+      },
+      "rs2228479": {
+        "brown": -0.054143,
+        "red": 0.62307,
+        "black": 0.17012,
+        "_effect_allele": "A"
+      },
+      "rs1110400": {
+        "brown": -0.56315,
+        "red": 1.4453,
+        "black": 0.29143,
+        "_effect_allele": "C"
+      },
+      "rs28777": {
+        "brown": 0.52168,
+        "red": 0.70401,
+        "black": 0.82228,
+        "_effect_allele": "C"
+      },
+      "rs16891982": {
+        "brown": 0.75284,
+        "red": -0.41869,
+        "black": 1.1617,
+        "_effect_allele": "C"
+      },
+      "rs12821256": {
+        "brown": -0.34957,
+        "red": -0.57964,
+        "black": -0.89824,
+        "_effect_allele": "G"
+      },
+      "rs4959270": {
+        "brown": -0.19171,
+        "red": 0.24861,
+        "black": -0.36359,
+        "_effect_allele": "A"
+      },
+      "rs12203592": {
+        "brown": 1.6475,
+        "red": 0.90233,
+        "black": 1.997,
+        "_effect_allele": "T"
+      },
+      "rs1042602": {
+        "brown": 0.16092,
+        "red": 0.45003,
+        "black": 0.065432,
+        "_effect_allele": "T"
+      },
+      "rs1800407": {
+        "brown": -0.19111,
+        "red": -0.27606,
+        "black": -0.49601,
+        "_effect_allele": "A"
+      },
+      "rs2402130": {
+        "brown": 0.35821,
+        "red": 0.28313,
+        "black": 0.26536,
+        "_effect_allele": "G"
+      },
+      "rs12913832": {
+        "brown": 1.214,
+        "red": -0.093776,
+        "black": 1.9391,
+        "_effect_allele": "T"
+      },
+      "rs2378249": {
+        "brown": 0.12669,
+        "red": 0.76634,
+        "black": -0.089509,
+        "_effect_allele": "C"
+      },
+      "rs683": {
+        "brown": 0.21172,
+        "red": -0.053427,
+        "black": 0.15796,
+        "_effect_allele": "G"
+      }
+    }
+  },
+  "hair_shade": {
+    "_reference_category": "light",
+    "_note": "Binary light/dark hair shade model; extra to the schema, ignored by predict_traits.py.",
+    "_source": "Walsh S, Liu F, Wollstein A, et al. 'The HIrisPlex system for simultaneous prediction of hair and eye colour from DNA.' Forensic Sci Int Genet. 2013;7(1):98-115. doi:10.1016/j.fsigen.2012.07.005 -- Supplementary interactive prediction tool (mmc7.xls, sheet 'macro'), downloaded from https://ars.els-cdn.com/content/image/1-s2.0-S1872497312001810-mmc7.xls [sheet \"macro\", rows 27-47]",
+    "intercepts": {
+      "dark": -2.528
+    },
+    "snp_coefficients": {
+      "rs11547464": {
+        "dark": -16.575,
+        "_effect_allele": "A"
+      },
+      "rs885479": {
+        "dark": 0.18709,
+        "_effect_allele": "T"
+      },
+      "rs1805008": {
+        "dark": -0.9331,
+        "_effect_allele": "T"
+      },
+      "rs1805005": {
+        "dark": -0.030452,
+        "_effect_allele": "T"
+      },
+      "rs1805006": {
+        "dark": -15.305,
+        "_effect_allele": "A"
+      },
+      "rs1805007": {
+        "dark": -1.7901,
+        "_effect_allele": "T"
+      },
+      "rs1805009": {
+        "dark": -0.078426,
+        "_effect_allele": "C"
+      },
+      "rs2228479": {
+        "dark": 0.0049399,
+        "_effect_allele": "A"
+      },
+      "rs1110400": {
+        "dark": -0.15892,
+        "_effect_allele": "C"
+      },
+      "rs28777": {
+        "dark": 1.4594,
+        "_effect_allele": "C"
+      },
+      "rs16891982": {
+        "dark": 0.78071,
+        "_effect_allele": "C"
+      },
+      "rs12821256": {
+        "dark": -0.7757,
+        "_effect_allele": "G"
+      },
+      "rs4959270": {
+        "dark": -0.44286,
+        "_effect_allele": "A"
+      },
+      "rs12203592": {
+        "dark": 1.8636,
+        "_effect_allele": "T"
+      },
+      "rs1042602": {
+        "dark": 0.18179,
+        "_effect_allele": "T"
+      },
+      "rs1800407": {
+        "dark": -0.59583,
+        "_effect_allele": "A"
+      },
+      "rs2402130": {
+        "dark": 0.33304,
+        "_effect_allele": "G"
+      },
+      "rs12913832": {
+        "dark": 1.9622,
+        "_effect_allele": "T"
+      },
+      "rs2378249": {
+        "dark": 0.090083,
+        "_effect_allele": "C"
+      },
+      "rs683": {
+        "dark": 0.18114,
+        "_effect_allele": "G"
+      }
+    }
+  },
+  "skin_color": null,
+  "_skin_color_status": "NOT_AVAILABLE. Walsh S, Chaitanya L, Breslin K, et al. \"Global skin colour prediction from DNA.\" Hum Genet. 2017;136(7):847-863 (open access, CC BY, PMC5487854) is the source of the 36-SNP skin model. Its Table 2 gives only one-vs-rest (\"versus the rest\") binomial betas, is embedded as a raster image (439_2017_1808_Tab2_HTML.jpg), and contains NO intercept/constant row -- so it cannot be used to build a working 5-category model. Both of its supplementary files (439_2017_1808_MOESM1/2_ESM.pdf) were downloaded and read in full: they contain only sample counts per country and Fitzpatrick-scale background, no coefficients. All four supplementary files of Chaitanya et al. 2018 (the HIrisPlex-S validation paper) and all eight of the 2019 HIrisPlex-S MPS paper were also downloaded and inspected: no model coefficients. Unlike the 2011 and 2013 papers, the skin paper ships no interactive prediction spreadsheet."
+}

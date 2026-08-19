@@ -8,6 +8,7 @@ venv/
 env.bak/
 .venv/
 *.env
+.pytest_cache/
 
 # PyTorch checkpoints
 *.pth
@@ -27,7 +28,8 @@ yarn-error.log*
 .DS_Store
 backend/node_modules/
 backend/venv/
-backend/checkpoints/
+backend/checkpoints/*
+!backend/checkpoints/hirisplex_s_coefficients.json
 backend/models/
 backend/data/
 backend/datasets/

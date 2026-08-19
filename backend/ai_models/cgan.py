@@ -1,3 +1,15 @@
+"""
+LEGACY / NOT PART OF THE ACTIVE PIPELINE.
+
+This is an early CelebA-trained conditional GAN prototype, superseded by the
+StyleGAN2-ADA + Kaggle-gallery pipeline (see backend/services/generation_service.js).
+It's kept in the repo for reference/reproducibility (training scripts, checkpoints) but
+`runLocalCganInference` in generation_service.js is defined and never called — no live
+route reaches this code. StyleGAN2-ADA FFHQ produces higher-resolution, more
+photorealistic output than this 64x64/128x128 DCGAN-style architecture can, which is why
+it replaced this approach rather than being used alongside it.
+"""
+
 import torch
 import torch.nn as nn
 

@@ -8,7 +8,9 @@
     "prepare:celeba": "..\\.venv\\Scripts\\python.exe training\\prepare_celeba.py --extract",
     "train:cgan": "..\\.venv\\Scripts\\python.exe training\\train_cgan.py",
     "train:cgan:smoke": "..\\.venv\\Scripts\\python.exe training\\train_cgan.py --epochs 1 --batch-size 8 --num-workers 0 --max-batches 25",
-    "infer:cgan": "..\\.venv\\Scripts\\python.exe inference\\generate_faces.py"
+    "infer:cgan": "..\\.venv\\Scripts\\python.exe inference\\generate_faces.py",
+    "test:python": "..\\.venv\\Scripts\\python.exe -m pytest tests -q",
+    "test": "node --test tests/*.test.js && npm run test:python"
   },
   "dependencies": {
     "cors": "^2.8.5",
