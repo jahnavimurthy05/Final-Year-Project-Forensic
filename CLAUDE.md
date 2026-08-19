@@ -42,10 +42,13 @@ npm run preview   # preview a production build
 
 ### CI
 `.github/workflows/ci.yml` installs `backend/ml_requirements.txt` (if present) and runs `npm ci` at the repo
-root, then a placeholder echo — there is no real test suite wired up yet.
+root, then a placeholder echo — CI itself does not yet run the test suite below (nothing wires it in).
 
-### No test suite
-There are currently no automated tests (backend, frontend, or Python). Don't assume a `test` script exists.
+### Tests
+`backend/tests/` has a minimal unit test suite covering the trait-prediction/matching logic only — no
+integration tests (nothing spins up Express or spawns the real Python subprocesses). Run via `npm test` in
+`backend/` (runs both `node --test tests/*.test.js` and `pytest tests -q` via the project `.venv`). Frontend
+still has no automated tests.
 
 ## Architecture
 
@@ -81,8 +84,9 @@ There are currently no automated tests (backend, frontend, or Python). Don't ass
    6. Response is enriched with an `auditTrailId` and forensic disclaimer text, then optionally logged to
       MongoDB (`face_generations` collection) if a DB is configured.
    - `backend/ai_models/cgan.py` + `backend/inference/generate_faces.py` (a local CelebA-trained CGAN) is a
-     third, currently-unwired code path (`runLocalCganInference` in `generation_service.js` is defined but
-     not called) — the current priority order is StyleGAN2 (opt-in) → Kaggle gallery (default) only.
+     third code path, deliberately kept as a documented legacy prototype rather than wired in or deleted —
+     see the module docstrings in both files. `runLocalCganInference` in `generation_service.js` is defined
+     but intentionally never called — the priority order is StyleGAN2 (opt-in) → Kaggle gallery (default).
 
 ### Trait normalization is the thing to get right
 Trait keys/values arrive under many aliases across the JS/Python boundary (`hairColor` vs `hair_color`,
@@ -91,16 +95,48 @@ Trait keys/values arrive under many aliases across the JS/Python boundary (`hair
 `backend/inference/predict_traits.py` (Python). When adding a new trait, update both, plus
 `DEFAULT_TRAIT_WEIGHTS` in `face_gallery_service.js` if it should influence gallery matching.
 
-### HIrisPlex-S phenotype prediction has two tiers
-`backend/inference/predict_traits.py` looks for `backend/checkpoints/hirisplex_s_coefficients.json`
-(validated Walsh et al. 2017 beta coefficients, not committed):
-- **Tier 1** (file present, not a `_status: "TEMPLATE..."` placeholder): real multinomial logistic
-  regression over SNP dosages (`_run_hirisplex_mlr`).
-- **Tier 2** (file absent/placeholder): approximate weighted rule-accumulation over a handful of hardcoded
-  SNP/allele → probability tables (`EYE_RULES`/`HAIR_RULES`/`SKIN_RULES`).
+### HIrisPlex phenotype prediction: Tier 1/Tier 2 decided independently per trait
+`backend/inference/predict_traits.py`'s `predict()` decides Tier 1 vs Tier 2 **per trait**
+(`eyeColor`/`hairColor`/`skinTone`), not as one global switch — check `metadata.tiers` in the response, not
+just the top-level `metadata.model` string (which is `"hirisplex-s-mlr-validated"` only when all three are
+Tier 1, `"hirisplex-s-rule-approximation"` only when all three are Tier 2, and `"hirisplex-mixed-tier"`
+otherwise — which is the actual current state: eye/hair are Tier 1, skin is Tier 2).
+- **Tier 1** (per trait, when that trait's coefficients are present in
+  `backend/checkpoints/hirisplex_s_coefficients.json` with `_status: "VALIDATED_FROM_SOURCE"`): real
+  multinomial logistic regression over SNP dosages.
+- **Tier 2** (per trait, otherwise): approximate weighted rule-accumulation over hardcoded SNP/allele →
+  probability tables (`EYE_RULES`/`HAIR_RULES`/`SKIN_RULES`).
 
-Both tiers return the same `{status, traits, probabilities, metadata}` shape, so callers don't need to know
-which tier ran — but `metadata.model`/`metadata.warning` indicate which one did.
+**Do not hardcode "validated" coefficient values without a verified source.** Presenting guessed values as a
+published paper's coefficients would be a real academic-integrity problem for a forensic project if wrong.
+Real, source-verified coefficients must cite exactly where each number came from — see below for how the
+currently-active ones were actually obtained and checked, twice, before being trusted.
+
+**How eye/hair Tier 1 went live (2026-08-19)**: real, published, source-cited coefficients for eye and hair
+colour were located (Walsh et al. 2013, "The HIrisPlex system...") and independently reproduced to 16
+significant digits against the source paper's own worked examples. Before activating them, every SNP's
+declared effect allele was cross-checked against this project's pre-existing (already-working)
+`EFFECT_ALLELE` table, and two — `rs12913832` and `rs1800407` — disagreed in a way that wasn't a simple
+strand flip. Rather than guess, both were looked up directly in dbSNP (NCBI RefSNP API + NCBI Gene
+coordinates) and cross-corroborated against the IrisPlex patent (US20110312534A1):
+- `rs12913832`: a genuine strand complement — HERC2 sits on the minus strand, so the paper's `"T"` = the
+  complement of this app's forward `"A"`.
+- `rs1800407`: dbSNP's real alleles are C/T — this app's hardcoded `"G"` (`dna_service.js`) was never a real
+  base at that locus at all, just an internal placeholder symbol that happens to point the correct direction.
+Both translations are applied via `_GENOTYPE_DOSAGE_OVERRIDE` in `predict_traits.py` (a direct verified
+genotype→dosage table, not a blind complement — the two cases needed different handling) and were checked to
+reproduce the expected direction against the pre-existing Tier 2 rules before being trusted (e.g. `rs12913832`
+`"GG"` → blue-dominant, `"AA"` → brown-dominant, matching `EYE_RULES`). Other SNPs flagged as mismatched in
+the initial pass (`rs1393350`, `rs12203592`, `rs1042602`, `rs683`) were **not** individually resolved — this
+app's SNP generator (`dna_service.js`'s `SNP_MARKERS`) never actually produces genotypes for those, so they
+always evaluate as "missing" and can't silently produce a wrong result; they'd need the same dbSNP-backed
+treatment if the SNP roster ever expands. `_load_coefficients()` was hardened to an allowlist of accepted
+`_status` values (not just "reject templates") so a future file has to be explicitly marked ready.
+
+**Skin colour has no equivalent Tier 1 path, and won't for now**: the HIrisPlex-S 36-SNP skin model (Walsh et
+al. 2017) was confirmed to not be publicly available in any usable form at all — its results table has no
+intercept row and is a raster image, not machine-readable numbers. This isn't a temporary gap to close later;
+Tier 2 is the only option for skin regardless of any allele-orientation work.
 
 ### The Kaggle-gallery fallback has one real, known gap — check before assuming trait matching works
 `backend/generated_faces/kaggle/metadata.json` (65 images) is the fallback engine's entire dataset, used

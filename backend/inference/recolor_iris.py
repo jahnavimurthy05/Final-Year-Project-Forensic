@@ -107,7 +107,7 @@ def _face_bbox_from_landmarks(landmarks, w, h):
     return x1, y1, x2, y2
 
 
-def _blend_ellipse(img, cx, cy, radius_x, radius_y, rgb_target, strength=0.85, mix=0.75):
+def _blend_ellipse(img, cx, cy, radius_x, radius_y, rgb_target, strength=0.8, mix=0.6):
     h, w, _ = img.shape
     x1, y1 = max(0, cx - radius_x), max(0, cy - radius_y)
     x2, y2 = min(w, cx + radius_x), min(h, cy + radius_y)
@@ -136,8 +136,10 @@ def recolor_iris_vivid(pil_image, eye_color="blue", landmarks=None):
         left_center, left_radius = _iris_geometry_from_landmarks(landmarks, _LEFT_IRIS)
         for (cx, cy), radius in ((right_center, right_radius), (left_center, left_radius)):
             # Iris landmarks mark the visible colored ring; pad slightly so the recolor
-            # fully covers it instead of leaving a thin untouched edge.
-            padded = int(round(radius * 1.35))
+            # fully covers it instead of leaving a thin untouched edge. Kept close to the
+            # measured radius (not much larger) so the result reads as a recolored iris
+            # rather than an oversized flat disc covering part of the sclera.
+            padded = int(round(radius * 1.15))
             _blend_ellipse(img, cx, cy, padded, padded, rgb_target)
     else:
         # Fixed-percentage fallback for when no face could be detected in the crop
@@ -174,6 +176,15 @@ def _feathered_effect(img, region, transform_fn, feather=10):
 
 
 def adapt_hair_and_skin(pil_image, hair_color="black", skin_tone="medium", landmarks=None):
+    """
+    Known limitation: the hair/skin split uses the face-landmark bounding box top as a
+    proxy for the hairline (no real hair segmentation model is used). This is a
+    reasonable approximation for most photos but is not exact, so for some crops a thin
+    strip of forehead or background near that boundary can pick up a faint tint from the
+    hair-color transform. This is a documented approximation, not a silent failure —
+    `metadata.detector` in the API response still reports whether real landmarks were
+    used at all for a given image.
+    """
     img = np.array(pil_image).astype(float)
     h, w, _ = img.shape
     hair_lower = str(hair_color).lower()
@@ -183,29 +194,53 @@ def adapt_hair_and_skin(pil_image, hair_color="black", skin_tone="medium", landm
         x1, y1, x2, y2 = _face_bbox_from_landmarks(landmarks, w, h)
         hair_h = max(1, y1)  # everything above the detected hairline/forehead top
         sx1, sy1, sx2, sy2 = x1, y1, x2, y2
+        # Hair covers a bit more than the face bbox width (temples/sides), but not the
+        # whole frame. The face bbox itself is already quite wide (jaw-to-jaw), so only
+        # a modest margin is added — a larger one (e.g. 50%) collapses back to the full
+        # image width for typical portraits and reintroduces the background bleed.
+        face_w = x2 - x1
+        face_h = y2 - y1
+        hx1 = max(0, int(x1 - face_w * 0.18))
+        hx2 = min(w, int(x2 + face_w * 0.18))
+        # There is often visible background between the top of the frame and the
+        # actual hairline (crops aren't always tight to the head) — starting the hair
+        # region at row 0 darkens/tints that background too. Without real hair
+        # segmentation this is a heuristic, not exact, but stopping short of the frame
+        # top noticeably reduces it (confirmed: a background pixel there previously
+        # shifted from (83,82,82) to (37,36,36) under a full-height hair region).
+        hair_top = max(0, int(y1 - face_h * 0.35))
     else:
         # Fixed-percentage fallback, tuned for FFHQ-style centered composites.
         hair_h = int(h * 0.32)
         sy1, sy2 = int(h * 0.28), int(h * 0.82)
         sx1, sx2 = int(w * 0.20), int(w * 0.80)
+        hx1, hx2 = int(w * 0.12), int(w * 0.88)
+        hair_top = 0
 
     # Skin region must not overlap the hair region, or the two effects compound
     # into a visible band where they meet.
     sy1 = max(sy1, hair_h)
 
-    # 1. Hair region adaptation
+    # 1. Hair region adaptation. Horizontally confined near the head (hx1..hx2) rather
+    # than the full frame width — otherwise this visibly tints background pixels beside
+    # the head (confirmed: a background corner pixel shifted from (139,137,129) to
+    # (62,61,58) under the old full-width region).
     if "black" in hair_lower or "dark" in hair_lower:
-        img = _feathered_effect(img, (0, hair_h, 0, w), lambda x: x * 0.45)
+        img = _feathered_effect(img, (hair_top, hair_h, hx1, hx2), lambda x: x * 0.45)
     elif "blonde" in hair_lower:
-        img = _feathered_effect(img, (0, hair_h, 0, w), lambda x: np.clip(x * 1.35 + [30, 20, 5], 0, 255))
+        img = _feathered_effect(img, (hair_top, hair_h, hx1, hx2), lambda x: np.clip(x * 1.35 + [30, 20, 5], 0, 255))
     elif "red" in hair_lower:
         # Channels are RGB order here (PIL "RGB" -> np.array) — boost red, cut blue for auburn.
-        img = _feathered_effect(img, (0, hair_h, 0, w), lambda x: np.clip(x * [1.45, 0.85, 0.7], 0, 255))
+        img = _feathered_effect(img, (hair_top, hair_h, hx1, hx2), lambda x: np.clip(x * [1.45, 0.85, 0.7], 0, 255))
 
-    # 2. Skin tone adaptation
+    # 2. Skin tone adaptation. "brown" and "dark" get distinct multipliers — they used to
+    # share one branch and rendered pixel-identical (confirmed: both produced (150,120,108)
+    # from the same (200,161,144) source pixel).
     if sy2 > sy1:
-        if "dark" in skin_lower or "brown" in skin_lower:
-            img = _feathered_effect(img, (sy1, sy2, sx1, sx2), lambda x: x * 0.75)
+        if "dark" in skin_lower:
+            img = _feathered_effect(img, (sy1, sy2, sx1, sx2), lambda x: x * 0.62)
+        elif "brown" in skin_lower:
+            img = _feathered_effect(img, (sy1, sy2, sx1, sx2), lambda x: x * 0.82)
         elif "fair" in skin_lower or "pale" in skin_lower:
             img = _feathered_effect(img, (sy1, sy2, sx1, sx2), lambda x: np.clip(x * 1.12, 0, 255))
         elif "olive" in skin_lower:

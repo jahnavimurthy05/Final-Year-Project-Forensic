@@ -232,6 +232,9 @@ function runIrisRecoloring(dataUrl, targetEyeColor, targetHairColor, targetSkinT
 }
 
 
+// LEGACY / NOT PART OF THE ACTIVE PIPELINE — never called from orchestrateFaceGeneration
+// or any route. Kept for reference; see backend/ai_models/cgan.py's module docstring for
+// why StyleGAN2-ADA replaced this approach instead of being wired in alongside it.
 function runLocalCganInference(traits) {
   const generateFacesScript = path.join(backendDir, "inference", "generate_faces.py");
   const checkpointPath = path.join(backendDir, "checkpoints", "generator.pth");

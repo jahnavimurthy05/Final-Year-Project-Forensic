@@ -109,8 +109,12 @@ Final-Year-Project-Forensic/
 ├─ .venv/                                  ← Python venv (repo root, NOT inside backend/)
 └─ backend/
    ├─ checkpoints/
-   │  ├─ hirisplex_s_coefficients.json     ← HIrisPlex-S MLR beta coefficients (Walsh et al. 2017)
-   │  │                                      absent/placeholder → falls back to rule-based approximation
+   │  ├─ hirisplex_s_coefficients.json     ← Tier 1 MLR beta coefficients, committed (small text file, not a
+   │  │                                      binary checkpoint — see .gitignore's explicit exception for it).
+   │  │                                      Currently covers eyeColor + hairColor only (real, source-cited
+   │  │                                      Walsh et al. 2013 values) — skinTone has no Tier 1 model to load
+   │  │                                      (none was ever published in usable form) and always runs Tier 2.
+   │  │                                      Absent/placeholder → both remaining traits fall back too. See §4.
    │  ├─ stylegan2-ada-ffhq.pkl            ← StyleGAN2-ADA FFHQ generator weights
    │  ├─ latent_directions/                ← *.npy direction vectors, e.g. gender.npy, age.npy,
    │  │                                       hair_black.npy, hair_blonde.npy, skin_fair.npy, ...
@@ -129,9 +133,10 @@ Final-Year-Project-Forensic/
 ```
 
 **What happens if a piece is missing** — the app degrades gracefully, in this order (see §4):
-1. No `hirisplex_s_coefficients.json` (or it's a `_status: "TEMPLATE"` placeholder) → phenotype prediction
-   uses the Tier-2 rule-based approximation instead of the validated regression model. Still works, just
-   less accurate; `metadata.model` in the API response tells you which tier ran.
+1. No `hirisplex_s_coefficients.json` (or it doesn't have `_status: "VALIDATED_FROM_SOURCE"`) → phenotype
+   prediction uses the Tier 2 rule-based approximation for every trait instead of the validated regression
+   model. Still works, just less accurate; `metadata.tiers` in the API response tells you which tier ran per
+   trait (`metadata.model` alone can be misleading — see §4, this is normally a *mixed* state, not all-or-nothing).
 2. `ENABLE_STYLEGAN` isn't `true` (the default), or it is but the `stylegan2-ada-pytorch` repo/checkpoint
    aren't present → face generation skips StyleGAN2 entirely and uses the Kaggle gallery
    (`backend/generated_faces/kaggle/`, already populated in this repo) — this is the normal, expected path.
@@ -154,10 +159,24 @@ two pieces that are genuinely optional quality/capability upgrades.
 
 2. **Phenotype prediction** (`backend/inference/predict_traits.py`, spawned from
    `backend/services/phenotype_service.js`)
-   - **Tier 1** — if `backend/checkpoints/hirisplex_s_coefficients.json` exists and isn't a placeholder:
-     real multinomial logistic regression over SNP allele dosages (Walsh et al. 2017 HIrisPlex-S model).
-   - **Tier 2** — otherwise: an approximate rule-based scoring table baked into the script.
-   - Output shape is identical either way: `{ status, traits, probabilities, metadata }`.
+   - Tier is decided **independently per trait** (`eyeColor`/`hairColor`/`skinTone`), not as one global
+     switch — check `metadata.tiers` in the response, not just the top-level `metadata.model` string.
+   - **Tier 1** (per trait, when that trait's coefficients are present in
+     `backend/checkpoints/hirisplex_s_coefficients.json` and not a placeholder): real multinomial logistic
+     regression over SNP allele dosages.
+   - **Tier 2** (per trait, otherwise): an approximate rule-based scoring table baked into the script.
+   - **Current actual state**: `eyeColor` and `hairColor` run **real Tier 1** — source-cited coefficients
+     (Walsh et al. 2013), independently reproduced to 16 significant digits against the paper's own worked
+     examples, and further verified end-to-end: the classic blue-eye genotype (`rs12913832 GG`, `rs1800407
+     CC`) predicts blue at 95%; the classic brown-eye genotype (`AA`/`GG`) predicts brown at 80%. `skinTone`
+     still runs Tier 2 — the HIrisPlex-S skin model (Walsh et al. 2017) has never been published anywhere in
+     a usable form (its results table has no intercept row and is a raster image, not machine-readable
+     numbers), so this isn't a temporary gap, it's the only option for skin right now. Getting eye/hair to
+     Tier 1 needed one extra step beyond just finding the coefficients: two SNPs' declared effect alleles
+     (`rs12913832`, `rs1800407`) didn't match this app's existing SNP convention, verified and resolved
+     against dbSNP directly rather than guessed — see `CLAUDE.md`'s HIrisPlex-S section for the full writeup,
+     citations, and why a blind strand-complement would NOT have worked for both SNPs.
+   - Output shape is identical regardless of which tier ran per trait: `{ status, traits, probabilities, metadata }`.
 
 3. **`POST /api/generate-face`** (`backend/services/generation_service.js#orchestrateFaceGeneration`)
    1. Re-runs phenotype prediction, merges predicted traits with any traits the user explicitly supplied
@@ -204,6 +223,17 @@ picking those values has **no effect** on which images are chosen — it silentl
 picked, so the output still visually reflects your choice — it just won't influence which underlying face is
 used.) Fixing this needs either broader/relabeled gallery images or the real StyleGAN2 path set up (§5).
 
+**Update (2026-08-19)**: verified directly (rendered blue-eye/dark-skin/green-eye variants and inspected the
+output) that the recoloring pass genuinely does produce blue eyes, green eyes, and darker skin regardless of
+the gallery's label gap — so this is a real limitation on *which base photo* gets picked, not a "the feature
+doesn't work at all" gap. While verifying this, two separate, previously-undocumented bugs were found and
+fixed in `recolor_iris.py` (see the comparison section below): `skinTone: "brown"` and `skinTone: "dark"`
+rendered pixel-identical output (both produced RGB `(150,120,108)` from the same source pixel — confirmed
+numerically), and the hair-color tint was bleeding into background pixels beside/above the head because its
+region spanned the full image width instead of being confined near the head (confirmed: a background corner
+pixel shifted from `(139,137,129)` to `(62,61,58)`). Both are fixed now — `brown` and `dark` produce distinct
+results (`(164,132,118)` vs `(124,99,89)` on the same test pixel) and background pixels are left untouched.
+
 **Correction (2026-08-18)**: an earlier version of this note claimed the gallery images looked like real
 photographs rather than StyleGAN2 output. That was wrong — confirmed by regenerating `seed: 1` with the real
 FFHQ checkpoint once it was set up (§5) and diffing it against `face_000001.png`: 99.98% pixel-identical
@@ -211,11 +241,49 @@ FFHQ checkpoint once it was set up (§5) and diffing it against `face_000001.png
 exactly as labeled. FFHQ-trained StyleGAN2 is simply extremely photorealistic — that's the same model family
 behind sites like "this person does not exist" — which is what led to the mistaken visual assessment.
 
+### Before / after — verified post-processing fixes
+Same source photo (`backend/generated_faces/kaggle/face_000001.png`), same requested traits
+(`eyeColor: blue, hairColor: red, skinTone: dark`), rendered through the pre-fix and current
+`recolor_iris.py`. This isn't a mockup — both images were generated by actually running the respective
+version of the script (the "before" version pulled from git history at commit `2f97d24`, before the
+MediaPipe/feathering/channel fixes landed) against the same input.
+
+| Before (`2f97d24`) | After (current) |
+|---|---|
+| ![before](docs/comparisons/recolor_before.jpg) | ![after](docs/comparisons/recolor_after.jpg) |
+
+What changed and why it's visible above:
+- **Red hair rendered as blue.** The old red-hair multiplier had its R/B channels swapped
+  (`[0.7, 0.8, 1.45]` instead of `[1.45, 0.85, 0.7]` in RGB order) — requesting "red" hair visibly tinted it
+  blue/purple instead. Fixed by correcting the channel order.
+- **Hard rectangular seam across the forehead/cheeks.** The old hair and skin regions were flat numpy-slice
+  assignments with no blending — you can see a sharp horizontal line where they meet. The current version
+  uses a Gaussian-feathered mask (`_feathered_effect`) so the transition is smooth.
+- **Fixed-percentage iris/region placement vs. real per-image detection.** The old version always assumed
+  FFHQ-centered eye coordinates and a fixed forehead/cheek box; the current version runs MediaPipe Face
+  Landmarker per image and only falls back to the fixed coordinates when no face is detected
+  (`metadata.detector` in the API response reports which path actually ran).
+- **Skin darkening is now distinguishable by tone.** `brown` and `dark` used to produce *identical* output
+  (see the update note above) — this image uses `dark`, now numerically confirmed distinct from `brown`.
+
+Known residual limitation, documented rather than hidden: the "after" image still shows a faint rectangular
+tint above the head, where the hair-color effect's bounding box still slightly overlaps background rather
+than actual hair — an inherent limitation of approximating the hairline from face landmarks (which don't
+extend into hair) instead of using a real hair-segmentation model. This is a smaller, harder problem than
+the three fixed above and is called out in `adapt_hair_and_skin`'s docstring rather than left silently.
+
 ---
 
 ## 5. Training / offline workflows
 
-### Local CGAN on CelebA (optional, currently not wired into `/api/generate-face`)
+### Local CGAN on CelebA — legacy prototype, kept for reference only
+**This is not part of the active pipeline and is not called from any route.** It was an early CelebA-trained
+conditional GAN approach (`backend/ai_models/cgan.py`), superseded by StyleGAN2-ADA once that was set up,
+because a 64x64/128x128 DCGAN-style architecture can't match StyleGAN2-ADA FFHQ's resolution/photorealism.
+It's kept in the repo (not deleted) for reference and reproducibility — the module docstrings in
+`backend/ai_models/cgan.py` and `backend/inference/generate_faces.py` say the same thing at the code level,
+and `runLocalCganInference` in `generation_service.js` is defined but never invoked. If you want to actually
+use it:
 See [`backend/training/README.md`](backend/training/README.md) for full dataset-placement instructions.
 ```powershell
 cd backend
@@ -226,8 +294,7 @@ cd backend
 ..\.venv\Scripts\python.exe inference\generate_faces.py --traits-json "{\"sex\":\"male\",\"hairColor\":\"black\"}"
 ```
 Outputs go to `backend/checkpoints/{generator,discriminator}.pth`, `cgan_config.json`,
-`backend/training/samples/`. `runLocalCganInference` in `generation_service.js` is implemented but not
-currently called by the API route — StyleGAN2 → Kaggle gallery is the live priority order.
+`backend/training/samples/`.
 
 ### Kaggle StyleGAN2 gallery (the fallback data already checked into this repo)
 See [`kaggle/README.md`](kaggle/README.md). Summary: run `kaggle/generate_stylegan_gallery.py` on a Kaggle
@@ -259,6 +326,30 @@ New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -Name
 
 ---
 
+## 5a. Tests
+
+Minimal unit tests for the trait-prediction/matching logic live under `backend/tests/` — Python
+(`test_predict_traits.py`, via `pytest`) and JS (`trait_logic.test.js`, via Node's built-in test runner).
+There is still no integration/end-to-end test suite (no test spins up the Express server or spawns the real
+Python subprocesses) — these cover the pure prediction/scoring logic only.
+
+```powershell
+cd backend
+npm install pytest    # first time only: ..\.venv\Scripts\pip install -r ml_requirements.txt
+npm test              # runs both the JS and Python suites
+# or individually:
+node --test tests/*.test.js
+..\.venv\Scripts\python.exe -m pytest tests -q
+```
+
+What's covered: SNP-to-dosage genotype counting, the Tier 2 rule-based fallback (including that it degrades
+gracefully with zero/unmatched markers), the Tier 1 MLR softmax/regression math against synthetic
+coefficients (real coefficients aren't committed — see §4's HIrisPlex-S note), manual-trait-override
+precedence, trait-key alias normalization, and gallery trait-matching (including a regression test that
+documents — rather than hides — the known gallery-label-coverage gap).
+
+---
+
 ## 6. API reference (current)
 
 | Method | Path | Purpose |
@@ -284,6 +375,56 @@ New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -Name
 
 > Keep appending dated entries here as the project evolves — newest on top.
 
+- **2026-08-19 (resolution)** — Resolved the allele-orientation blocker from the entry just below and
+  activated real Tier 1 for `eyeColor`/`hairColor`. Dispatched a scoped dbSNP verification for exactly the
+  two SNPs that mattered — this app only ever generates genotypes for 4 SNPs total
+  (`backend/services/dna_service.js`), so the earlier "several SNPs mismatch" finding narrowed to just
+  `rs12913832` and `rs1800407` (the other two already agreed). Findings, both confirmed against NCBI dbSNP's
+  RefSNP API and independently corroborated by the IrisPlex patent (US20110312534A1): `rs12913832` is a
+  genuine strand complement (HERC2 is on the minus strand); `rs1800407`'s real dbSNP alleles are C/T, and
+  this app's hardcoded "G" for that SNP was never a real base at all, just an internal placeholder that
+  happens to point the correct direction. Implemented both as an explicit, cited, verified
+  genotype→dosage translation (`_GENOTYPE_DOSAGE_OVERRIDE` in `predict_traits.py` — not a blind complement,
+  since the two cases needed different handling), cross-checked the results against the pre-existing Tier 2
+  rules for directional agreement before trusting them, then moved the coefficients file to its live path.
+  End-to-end verified: the classic blue-eye genotype now predicts blue at 95%, the classic brown-eye genotype
+  predicts brown at 80% — real, responsive regression, not the previous always-95%-blue-regardless-of-input
+  bug. Added 3 more regression tests (17 pytest + 6 Node-test = 23 total) covering the translation and its
+  directional correctness.
+- **2026-08-19 (follow-up)** — The HIrisPlex coefficient research (below) came back with real, source-cited,
+  independently-reproduced eye/hair coefficients (Walsh et al. 2013) — genuinely obtainable, not fabricated.
+  Before wiring them in, cross-checked every SNP's declared effect allele against this project's existing
+  `EFFECT_ALLELE` table (used by the already-working Tier 2 rules) as a sanity check, and found a real
+  problem: several SNPs disagree, and not via a simple strand complement — most importantly `rs12913832`
+  (arguably *the* eye-colour SNP), where the new file's effect allele is `"T"` but the existing table (and
+  presumably this app's actual SNP-generation convention) uses `"G"`. Confirmed by direct testing: genotypes
+  `"GG"` and `"AA"` at that locus — the two opposite homozygous cases — both computed dosage `0` against the
+  new file, meaning the regression would be blind to this SNP's real signal. Decision: did **not** activate
+  the file. It's saved as `backend/checkpoints/hirisplex_s_coefficients.PENDING_VERIFICATION.json` (a
+  filename `predict_traits.py` doesn't auto-load) rather than the live path, since shipping something that
+  *looks* validated but silently miscounts key SNPs would be worse than the honestly-approximate Tier 2.
+  Also refactored `predict_traits.py` so eye/hair/skin each pick Tier 1 vs Tier 2 independently
+  (`metadata.tiers`) instead of one global switch, and fixed a related latent bug this surfaced: dosage was
+  being computed from one shared module-level effect-allele table regardless of which trait/paper a SNP's
+  coefficients came from — now each trait computes dosage from its own coefficients' declared effect allele.
+  Added regression tests for both the mixed-tier selection and the per-trait dosage computation. Next step:
+  verify each mismatched SNP's true orientation against dbSNP before promoting the pending file to active.
+- **2026-08-19** — Worked through a pre-submission gap list (viva-readiness pass). Added a minimal test
+  suite (`backend/tests/` — 12 pytest cases for `predict_traits.py`, 6 Node-test cases for trait
+  normalization/gallery matching; `npm test` in `backend/`), where previously there were zero automated
+  tests. While directly testing the gallery's known label-coverage gap (§4) to confirm blue eyes/dark skin
+  actually render, found and fixed two previously-undocumented bugs in `recolor_iris.py`: `skinTone: "brown"`
+  and `"dark"` produced pixel-identical output (confirmed numerically, now distinct), and the hair-color tint
+  was bleeding into background pixels beside the head because its region spanned the full image width
+  (confirmed numerically, now confined near the head). Also tightened the iris-recolor blend (smaller/less
+  opaque) since it looked like a flat solid disc rather than a recolored iris — see §4's before/after
+  comparison for all of the above with actual rendered images, not just a description. Documented (rather
+  than deleted) the legacy CGAN prototype (`backend/ai_models/cgan.py`) as intentionally unused —
+  superseded by StyleGAN2-ADA — via module docstrings and this README, so it doesn't read as unfinished work.
+  Explicitly decided *not* to hardcode "validated" HIrisPlex-S coefficients without a verified source (see
+  §4's HIrisPlex-S note) — presenting guessed numbers as Walsh et al. (2017) values would be a real academic-
+  integrity risk for a forensic report; dispatched a research pass to check whether the real published
+  coefficients are actually obtainable, findings to follow.
 - **2026-08-18** — Actually set up the StyleGAN2-ADA live-generation path (cloned the repo, installed
   torch/torchvision — hit and fixed a Windows long-path install failure, see §5 — downloaded the 364MB FFHQ
   checkpoint) to test it end-to-end. Confirmed it generates correctly, but also confirmed it's impractically
