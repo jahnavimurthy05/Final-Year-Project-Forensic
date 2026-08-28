@@ -38,6 +38,10 @@ export default function GenerationPage() {
 
       {/* Trait Summary Badge */}
       <div className="flex flex-wrap gap-4 justify-center mb-6 glass-panel px-6 py-3 rounded-full border border-gray-700">
+        <span className="text-sm font-mono text-gray-300">
+          {dnaState.traits.sex === 'female' ? '♀' : '♂'} <strong className="text-cyberBlue capitalize">{dnaState.traits.sex || 'Male'}</strong>
+        </span>
+        <span className="text-gray-600">•</span>
         <span className="text-sm font-mono text-gray-300">Target Hair: <strong className="text-cyberBlue capitalize">{dnaState.traits.hairColor || 'Black'}</strong></span>
         <span className="text-gray-600">•</span>
         <span className="text-sm font-mono text-gray-300">Target Eye: <strong className="text-cyberBlue capitalize">{dnaState.traits.eyeColor || 'Brown'}</strong></span>

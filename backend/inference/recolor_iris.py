@@ -20,11 +20,13 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 EYE_COLORS = {
-    "brown": (92, 55, 28),
+    "black": (20, 15, 10),         # Near-black dark brown (true black irises are very dark brown)
     "dark brown": (50, 30, 15),
+    "brown": (92, 55, 28),
     "blue": (30, 144, 255),        # Vibrant Dodger Blue
     "green": (46, 139, 87),        # Vibrant Sea Green
-    "hazel": (205, 133, 63),       # Golden Hazel
+    "hazel": (130, 90, 40),        # Warm Hazel
+    "amber": (180, 110, 20),       # Amber
     "gray": (140, 155, 165),
     "grey": (140, 155, 165),
 }
@@ -125,22 +127,27 @@ def _blend_ellipse(img, cx, cy, radius_x, radius_y, rgb_target, strength=0.8, mi
     )
 
 
-def recolor_iris_vivid(pil_image, eye_color="blue", landmarks=None):
+def recolor_iris_vivid(pil_image, eye_color="brown", landmarks=None):
     img = np.array(pil_image).copy()
     h, w, _ = img.shape
     color_name = str(eye_color).strip().lower()
-    rgb_target = EYE_COLORS.get(color_name, EYE_COLORS["blue"])
+    rgb_target = EYE_COLORS.get(color_name, EYE_COLORS["brown"])
 
     if landmarks:
         right_center, right_radius = _iris_geometry_from_landmarks(landmarks, _RIGHT_IRIS)
         left_center, left_radius = _iris_geometry_from_landmarks(landmarks, _LEFT_IRIS)
         for (cx, cy), radius in ((right_center, right_radius), (left_center, left_radius)):
-            # Iris landmarks mark the visible colored ring; pad slightly so the recolor
-            # fully covers it instead of leaving a thin untouched edge. Kept close to the
-            # measured radius (not much larger) so the result reads as a recolored iris
-            # rather than an oversized flat disc covering part of the sclera.
-            padded = int(round(radius * 1.15))
-            _blend_ellipse(img, cx, cy, padded, padded, rgb_target)
+            # Keep the recolor inside the actual iris ring — 0.9x slightly under-fills
+            # which is safer than over-filling onto the sclera/eyelids. The iris landmark
+            # ring already marks the visible iris boundary, so no outward padding is needed.
+            padded = int(round(radius * 0.90))
+            # Dark colors (black/dark brown) need strongest blending to overpower
+            # any underlying light iris; all colors need strong enough mix to
+            # actually replace the original iris color, not just tint it.
+            is_dark = rgb_target[0] < 80 and rgb_target[1] < 80 and rgb_target[2] < 80
+            blend_strength = 0.98 if is_dark else 0.95
+            blend_mix = 0.90 if is_dark else 0.80
+            _blend_ellipse(img, cx, cy, padded, padded, rgb_target, strength=blend_strength, mix=blend_mix)
     else:
         # Fixed-percentage fallback for when no face could be detected in the crop
         # (e.g. extreme close-up or an unusual pose). Tuned for FFHQ-style centered composites.
@@ -150,8 +157,11 @@ def recolor_iris_vivid(pil_image, eye_color="blue", landmarks=None):
         ]
         radius_x = int(w * 0.038)
         radius_y = int(h * 0.032)
+        is_dark = rgb_target[0] < 80 and rgb_target[1] < 80 and rgb_target[2] < 80
+        blend_strength = 0.95 if is_dark else 0.85
+        blend_mix = 0.85 if is_dark else 0.65
         for cx, cy in centers:
-            _blend_ellipse(img, cx, cy, radius_x, radius_y, rgb_target)
+            _blend_ellipse(img, cx, cy, radius_x, radius_y, rgb_target, strength=blend_strength, mix=blend_mix)
 
     return Image.fromarray(img)
 
@@ -293,6 +303,8 @@ def main():
             eye_color = payload.get("eyeColor") or payload.get("eye_color") or eye_color
             hair_color = payload.get("hairColor") or payload.get("hair_color") or hair_color
             skin_tone = payload.get("skinTone") or payload.get("skin_tone") or skin_tone
+            # Debug: log received values so Node-side issues are visible in backend stderr
+            print(f"[recolor_iris] received eyeColor={eye_color!r} hairColor={hair_color!r} skinTone={skin_tone!r}", file=sys.stderr)
 
         if not data_url:
             print(json.dumps({"status": "error", "error": "No image data URL provided"}))

@@ -2,8 +2,8 @@ import { existsSync, readdirSync, readFileSync } from "fs";
 import path from "path";
 
 const DEFAULT_TRAIT_WEIGHTS = {
-  sex: 3,
-  gender: 3,
+  sex: 10,      // primary filter — always dominates other traits
+  gender: 10,
   hairColor: 3,
   eyeColor: 3,
   skinTone: 2,
@@ -54,33 +54,28 @@ export function loadFaceGallery(galleryDir) {
 }
 
 export function selectGalleryFaces(gallery, requestedTraits, count = 4) {
-  const traitHash = getTraitHash(requestedTraits);
-  
-  const scored = gallery.map((face, index) => {
+  // Score every face against the requested traits
+  const scored = gallery.map((face) => {
     const score = scoreTraits(face.traits || {}, requestedTraits || {});
-    // Add deterministic micro-offset derived from requestedTraits hash & face index
-    const tieBreaker = (Math.sin(traitHash + index * 1.618) + 1) * 0.1;
-    return {
-      ...face,
-      score: score + tieBreaker,
-    };
+    return { ...face, score };
   });
 
-  return scored
-    .sort((a, b) => b.score - a.score)
-    .slice(0, count);
-}
+  // Sort by score descending — highest match first
+  scored.sort((a, b) => b.score - a.score);
 
-function getTraitHash(traits) {
-  const str = JSON.stringify(traits || {});
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i);
-    hash |= 0;
+  // Always include the top `count` matches. Then shuffle a wider pool and
+  // backfill with variety from lower-ranked faces if count > top matches.
+  const topFaces = scored.slice(0, count);
+
+  // Shuffle the remainder (lower-ranked) for variety in backfill
+  const remainder = scored.slice(count);
+  for (let i = remainder.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [remainder[i], remainder[j]] = [remainder[j], remainder[i]];
   }
-  return Math.abs(hash);
-}
 
+  return [...topFaces, ...remainder].slice(0, count);
+}
 
 export function encodeImageAsDataUrl(imagePath) {
   const ext = path.extname(imagePath).toLowerCase();
