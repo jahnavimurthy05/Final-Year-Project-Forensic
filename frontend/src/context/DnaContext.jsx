@@ -6,11 +6,12 @@ export function DnaProvider({ children }) {
   const [dnaState, setDnaState] = useState({
     snpMarkers: [],
     traits: {
-      hairColor: 'Black',
-      eyeColor: 'Brown',
-      faceShape: 'Oval',
-      cheekbone: 'High',
-      skinTone: 'Medium',
+      sex: 'male',
+      hairColor: 'black',
+      eyeColor: 'brown',
+      faceShape: 'oval',
+      cheekbone: 'high',
+      skinTone: 'medium',
     },
     probabilities: {},
     rawMarkerString: '',

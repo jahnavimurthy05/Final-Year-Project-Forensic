@@ -43,11 +43,26 @@ export async function orchestrateFaceGeneration(inputData = {}, { signal } = {})
     metadata: { note: "Fallback to default normalization" },
   }));
 
-  const userTraits = normalizeTraits(inputData.traits || inputData);
+  // Extract the flat traits object from the request body.
+  // The frontend sends { traits: { hairColor, eyeColor, ... }, snpMarkers: [...] }
+  // so inputData.traits is the real traits map. Fall back to inputData itself only
+  // when it's already a flat trait map (no nested .traits key).
+  const rawTraits = (inputData.traits && typeof inputData.traits === "object" && !inputData.traits.traits)
+    ? inputData.traits
+    : (inputData.traits?.traits || inputData.traits || inputData);
+
+  const userTraits = normalizeTraits(rawTraits);
   const traits = {
     ...(phenotypePrediction.traits || {}),
-    ...userTraits,
+    ...userTraits,  // user selection always wins over HIrisPlex prediction
   };
+  // DEBUG: log trait merge so we can see what eyeColor reaches iris recoloring
+  console.log("[generation] rawTraits extracted:", JSON.stringify(rawTraits));
+  console.log("[generation] phenotypePrediction.traits:", JSON.stringify(phenotypePrediction.traits));
+  console.log("[generation] userTraits (normalized):", JSON.stringify(userTraits));
+  console.log("[generation] final traits.eyeColor =>", traits.eyeColor);
+
+
   const phenotypeMetadata = {
     probabilities: phenotypePrediction.probabilities || {},
     hirisplex: phenotypePrediction.metadata || {},
@@ -164,7 +179,7 @@ function runStyleganInference(traits, signal) {
 }
 
 async function applyPostProcessing(variations, traits, signal) {
-  const targetEyeColor = traits.eyeColor || "blue";
+  const targetEyeColor = traits.eyeColor || "brown";
   const targetHairColor = traits.hairColor || "black";
   const targetSkinTone = traits.skinTone || "medium";
   const processedVariations = [];

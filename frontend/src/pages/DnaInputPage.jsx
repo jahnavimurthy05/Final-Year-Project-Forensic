@@ -39,11 +39,35 @@ export default function DnaInputPage() {
         <div className="glass-panel p-6 rounded-lg">
           <h3 className="text-2xl font-semibold mb-6 border-b border-gray-600 pb-2">Phenotype Trait Mapping</h3>
           
-          <div className="space-y-6">
+        <div className="space-y-6">
+
+            {/* Sex */}
+            <div>
+              <label className="block text-gray-400 mb-2 flex items-center gap-2">
+                <span>🧬</span> Biological Sex
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {['male', 'female'].map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => handleTraitChange('sex', opt)}
+                    className={`py-3 rounded-lg border-2 font-bold text-sm capitalize transition-all duration-200 ${
+                      dnaState.traits.sex === opt
+                        ? 'border-cyberBlue bg-cyberBlue/20 text-cyberBlue shadow-[0_0_12px_#00d2ff]'
+                        : 'border-gray-700 bg-darkBg text-gray-400 hover:border-gray-500'
+                    }`}
+                  >
+                    {opt === 'male' ? '♂ Male' : '♀ Female'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Hair Color */}
             <div>
               <label className="block text-gray-400 mb-2">Hair Color</label>
               <select 
-                value={dnaState.traits.hairColor || 'Black'}
+                value={dnaState.traits.hairColor || 'black'}
                 onChange={(e) => handleTraitChange('hairColor', e.target.value)}
                 className="w-full bg-darkBg border border-gray-700 rounded p-3 text-white focus:border-cyberBlue outline-none transition-colors capitalize"
               >
@@ -54,10 +78,11 @@ export default function DnaInputPage() {
               </select>
             </div>
 
+            {/* Eye Color */}
             <div>
               <label className="block text-gray-400 mb-2">Eye Color</label>
               <select 
-                value={dnaState.traits.eyeColor || 'Brown'}
+                value={dnaState.traits.eyeColor || 'brown'}
                 onChange={(e) => handleTraitChange('eyeColor', e.target.value)}
                 className="w-full bg-darkBg border border-gray-700 rounded p-3 text-white focus:border-cyberBlue outline-none transition-colors capitalize"
               >
@@ -65,13 +90,15 @@ export default function DnaInputPage() {
                 <option value="blue">Blue</option>
                 <option value="green">Green</option>
                 <option value="hazel">Hazel</option>
+                <option value="black">Black</option>
               </select>
             </div>
 
+            {/* Skin Tone */}
             <div>
               <label className="block text-gray-400 mb-2">Skin Tone</label>
               <select 
-                value={dnaState.traits.skinTone || 'Medium'}
+                value={dnaState.traits.skinTone || 'medium'}
                 onChange={(e) => handleTraitChange('skinTone', e.target.value)}
                 className="w-full bg-darkBg border border-gray-700 rounded p-3 text-white focus:border-cyberBlue outline-none transition-colors capitalize"
               >
@@ -83,10 +110,11 @@ export default function DnaInputPage() {
               </select>
             </div>
 
+            {/* Face Shape */}
             <div>
               <label className="block text-gray-400 mb-2">Face Shape</label>
               <select 
-                value={dnaState.traits.faceShape || 'Oval'}
+                value={dnaState.traits.faceShape || 'oval'}
                 onChange={(e) => handleTraitChange('faceShape', e.target.value)}
                 className="w-full bg-darkBg border border-gray-700 rounded p-3 text-white focus:border-cyberBlue outline-none transition-colors capitalize"
               >
@@ -97,6 +125,7 @@ export default function DnaInputPage() {
               </select>
             </div>
           </div>
+
         </div>
 
         <div className="glass-panel p-6 rounded-lg flex flex-col justify-between">
