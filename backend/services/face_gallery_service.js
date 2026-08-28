@@ -54,9 +54,27 @@ export function loadFaceGallery(galleryDir) {
 }
 
 export function selectGalleryFaces(gallery, requestedTraits, count = 4) {
-  // Score every face against the requested traits
-  const scored = gallery.map((face) => {
-    const score = scoreTraits(face.traits || {}, requestedTraits || {});
+  const requestedSex = (requestedTraits?.sex || '').trim().toLowerCase();
+
+  // Hard pre-filter by sex — sex must match exactly before any scoring.
+  // This guarantees male selection never shows female faces and vice versa,
+  // regardless of scoring weights or edge-case metadata issues.
+  let candidates = gallery;
+  if (requestedSex) {
+    const bySex = gallery.filter(
+      (f) => (f.traits?.sex || '').trim().toLowerCase() === requestedSex
+    );
+    if (bySex.length >= count) {
+      candidates = bySex;
+    }
+  }
+
+  // Score candidates by ALL remaining traits (sex excluded — already filtered)
+  const traitsWithoutSex = { ...requestedTraits };
+  delete traitsWithoutSex.sex;
+
+  const scored = candidates.map((face) => {
+    const score = scoreTraits(face.traits || {}, traitsWithoutSex || {});
     return { ...face, score };
   });
 

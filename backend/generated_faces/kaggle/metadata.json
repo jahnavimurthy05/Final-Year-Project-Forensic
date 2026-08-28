@@ -79,7 +79,7 @@
     "seed": 6,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "female",
+      "sex": "male",
       "hairColor": "blonde",
       "eyeColor": "hazel",
       "skinTone": "medium",
