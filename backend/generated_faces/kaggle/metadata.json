@@ -19,7 +19,7 @@
     "seed": 2,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "female",
+      "sex": "male",
       "hairColor": "blonde",
       "eyeColor": "hazel",
       "skinTone": "olive",
@@ -64,7 +64,7 @@
     "seed": 5,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "red",
       "eyeColor": "brown",
       "skinTone": "olive",
@@ -79,7 +79,7 @@
     "seed": 6,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "blonde",
       "eyeColor": "hazel",
       "skinTone": "medium",
@@ -94,7 +94,7 @@
     "seed": 7,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "red",
       "eyeColor": "brown",
       "skinTone": "medium",
@@ -124,7 +124,7 @@
     "seed": 9,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "red",
       "eyeColor": "hazel",
       "skinTone": "medium",
@@ -169,7 +169,7 @@
     "seed": 12,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "female",
+      "sex": "male",
       "hairColor": "red",
       "eyeColor": "hazel",
       "skinTone": "medium",
@@ -199,7 +199,7 @@
     "seed": 14,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "female",
+      "sex": "male",
       "hairColor": "red",
       "eyeColor": "brown",
       "skinTone": "medium",
@@ -229,7 +229,7 @@
     "seed": 16,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "female",
+      "sex": "male",
       "hairColor": "red",
       "eyeColor": "brown",
       "skinTone": "medium",
@@ -244,7 +244,7 @@
     "seed": 17,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "red",
       "eyeColor": "hazel",
       "skinTone": "olive",
@@ -304,7 +304,7 @@
     "seed": 21,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "red",
       "eyeColor": "brown",
       "skinTone": "olive",
@@ -319,7 +319,7 @@
     "seed": 22,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "female",
+      "sex": "male",
       "hairColor": "brown",
       "eyeColor": "hazel",
       "skinTone": "olive",
@@ -349,7 +349,7 @@
     "seed": 24,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "female",
+      "sex": "male",
       "hairColor": "red",
       "eyeColor": "hazel",
       "skinTone": "medium",
@@ -379,7 +379,7 @@
     "seed": 26,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "black",
       "eyeColor": "brown",
       "skinTone": "olive",
@@ -394,7 +394,7 @@
     "seed": 27,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "black",
       "eyeColor": "brown",
       "skinTone": "medium",
@@ -514,7 +514,7 @@
     "seed": 35,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "brown",
       "eyeColor": "hazel",
       "skinTone": "medium",
@@ -559,7 +559,7 @@
     "seed": 38,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "brown",
       "eyeColor": "hazel",
       "skinTone": "medium",
@@ -589,7 +589,7 @@
     "seed": 40,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "female",
+      "sex": "male",
       "hairColor": "brown",
       "eyeColor": "brown",
       "skinTone": "medium",
@@ -634,7 +634,7 @@
     "seed": 43,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "brown",
       "eyeColor": "hazel",
       "skinTone": "olive",
@@ -664,7 +664,7 @@
     "seed": 45,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "brown",
       "eyeColor": "brown",
       "skinTone": "medium",
@@ -694,7 +694,7 @@
     "seed": 47,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "red",
       "eyeColor": "hazel",
       "skinTone": "fair",
@@ -709,7 +709,7 @@
     "seed": 48,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "female",
+      "sex": "male",
       "hairColor": "red",
       "eyeColor": "hazel",
       "skinTone": "olive",
@@ -739,7 +739,7 @@
     "seed": 50,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "female",
+      "sex": "male",
       "hairColor": "red",
       "eyeColor": "hazel",
       "skinTone": "olive",
@@ -799,7 +799,7 @@
     "seed": 54,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "red",
       "eyeColor": "hazel",
       "skinTone": "medium",
@@ -844,7 +844,7 @@
     "seed": 57,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "red",
       "eyeColor": "brown",
       "skinTone": "medium",
@@ -874,7 +874,7 @@
     "seed": 59,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "brown",
       "eyeColor": "hazel",
       "skinTone": "medium",
@@ -904,7 +904,7 @@
     "seed": 61,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "brown",
       "eyeColor": "hazel",
       "skinTone": "olive",
@@ -934,7 +934,7 @@
     "seed": 63,
     "model": "stylegan2-ada-ffhq",
     "traits": {
-      "sex": "male",
+      "sex": "female",
       "hairColor": "brown",
       "eyeColor": "brown",
       "skinTone": "medium",
