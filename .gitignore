@@ -8,6 +8,8 @@ venv/
 env.bak/
 .venv/
 *.env
+users.json
+backend/users.json
 .pytest_cache/
 
 # PyTorch checkpoints

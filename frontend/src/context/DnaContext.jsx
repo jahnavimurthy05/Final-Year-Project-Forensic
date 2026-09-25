@@ -12,6 +12,7 @@ export function DnaProvider({ children }) {
       faceShape: 'oval',
       cheekbone: 'high',
       skinTone: 'medium',
+      observedHairColor: 'black',  // Modality 1: Physical Hair Evidence Record
     },
     probabilities: {},
     rawMarkerString: '',

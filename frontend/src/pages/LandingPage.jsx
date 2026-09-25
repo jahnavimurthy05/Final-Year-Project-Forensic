@@ -14,7 +14,7 @@ export default function LandingPage() {
           Synthesize Suspects from DNA
         </h1>
         <p className="text-xl text-gray-300 mb-10 leading-relaxed">
-          Advanced AI-powered forensic simulation system using Conditional GANs to generate approximate suspect facial images from hair samples and synthetic genetic markers.
+          Multi-Modal Forensic Face Synthesis — fusing Physical Hair Evidence with Synthetic DNA via HIrisPlex-S and StyleGAN2 latent space editing.
         </p>
         
         <div className="flex justify-center gap-6">

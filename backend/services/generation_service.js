@@ -1,3 +1,5 @@
+import "dotenv/config";
+import { existsSync } from "fs";
 import { spawn } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -8,6 +10,7 @@ import {
   selectGalleryFaces,
   encodeImageAsDataUrl,
 } from "./face_gallery_service.js";
+import { fuseHairAndDna } from "./attribute_fusion_service.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,9 +29,17 @@ const styleganRepo = path.resolve(
 const latentDirectionsDir = path.resolve(
   process.env.LATENT_DIRECTIONS_DIR || path.join(backendDir, "checkpoints", "latent_directions")
 );
-const kaggleGalleryDir = path.resolve(
-  process.env.KAGGLE_FACE_GALLERY_DIR || path.join(backendDir, "generated_faces", "kaggle")
-);
+
+function getKaggleGalleryDir() {
+  if (process.env.KAGGLE_FACE_GALLERY_DIR) {
+    return path.resolve(process.env.KAGGLE_FACE_GALLERY_DIR);
+  }
+  const indianDir = path.join(backendDir, "generated_faces", "indian_frontal");
+  if (existsSync(indianDir)) {
+    return indianDir;
+  }
+  return path.join(backendDir, "generated_faces", "kaggle");
+}
 
 // StyleGAN2 live generation is CPU-minutes-per-image without a CUDA GPU, so it's opt-in only.
 // Unset/false (the default) skips straight to the fast, pre-rendered Kaggle gallery.
@@ -68,8 +79,43 @@ export async function orchestrateFaceGeneration(inputData = {}, { signal } = {})
     hirisplex: phenotypePrediction.metadata || {},
   };
 
+  // ── Multi-Modal Attribute Fusion ──────────────────────────────────────────
+  // Modality 1: Physical Hair Evidence Record (observed colour from the
+  //             crime-scene report or investigator notes).
+  // Modality 2: HIrisPlex-S SNP-derived genomic prediction (above).
+  // The fusion engine (Bayesian Weighted Log-Opinion Pool) cross-validates the
+  // two channels and flags concordance / discordance for the forensic audit trail.
+  const observedHairColor =
+    inputData.traits?.observedHairColor ||
+    inputData.observedHairColor ||
+    traits.hairColor ||
+    "brown";
+
+  const dnaHairProbabilities = phenotypePrediction.probabilities?.hairColor || {};
+  // dnaCompleteness: fraction of the 4 expected SNP markers that were supplied.
+  const snpCount = (inputData.snpMarkers || []).length;
+  const dnaCompleteness = Math.min(1, snpCount / 4);
+
+  const fusionResult = fuseHairAndDna({
+    observedHairColor,
+    dnaHairProbabilities,
+    dnaCompleteness,
+  });
+
+  // The fused colour overrides the raw selection — it is the evidence-reconciled
+  // phenotype that both gallery matching and iris recoloring should use.
+  traits.hairColor = fusionResult.fusedHairColor;
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // DEBUG: log trait merge so we can see what eyeColor reaches iris recoloring
+  console.log("[generation] rawTraits extracted:", JSON.stringify(rawTraits));
+  console.log("[generation] phenotypePrediction.traits:", JSON.stringify(phenotypePrediction.traits));
+  console.log("[generation] userTraits (normalized):", JSON.stringify(userTraits));
+  console.log("[generation] final traits.eyeColor =>", traits.eyeColor);
+  console.log("[generation] attribute fusion =>", JSON.stringify(fusionResult.crossValidation));
 
   // 2. StyleGAN2-ADA Latent Generation (opt-in primary engine — see ENABLE_STYLEGAN above)
+
   if (styleganEnabled) {
     try {
       const styleganResult = await runStyleganInference(traits, signal);
@@ -86,12 +132,16 @@ export async function orchestrateFaceGeneration(inputData = {}, { signal } = {})
           status: "success",
           variations,
           metadata: {
+            modality_1: "Physical Hair Evidence Record",
+            modality_2: "Synthetic Genomic Profile (HIrisPlex-S)",
+            fusion_engine: "Bayesian Weighted Log-Opinion Pool",
             traits_used: traits,
             hirisplex_probabilities: phenotypeMetadata.probabilities,
             model: "stylegan2-ada-ffhq",
             stylegan_edits: styleganResult.metadata,
             confidence_scores: confidenceScores,
             post_processing: postProcessing,
+            attribute_fusion: fusionResult,
             forensic_disclaimer:
               "This composite is a probabilistic phenotypic representation generated via StyleGAN2 W+ latent editing and MediaPipe landmark post-processing.",
           },
@@ -102,10 +152,13 @@ export async function orchestrateFaceGeneration(inputData = {}, { signal } = {})
     }
   }
 
-  // 3. Fallback (default): Kaggle Dataset Gallery Matching + MediaPipe Iris Recoloring
-  const gallery = loadFaceGallery(kaggleGalleryDir);
+  // 3. Fallback (default): Gallery Matching + MediaPipe Iris Recoloring
+  const activeGalleryDir = getKaggleGalleryDir();
+  const gallery = loadFaceGallery(activeGalleryDir);
+  console.log(`[generation] Using gallery at ${activeGalleryDir} (${gallery.length} faces)`);
   if (gallery.length > 0) {
     const selectedFaces = selectGalleryFaces(gallery, traits, 4);
+    console.log("[generation] Selected faces:", selectedFaces.map(f => f.file));
     const rawVariations = selectedFaces.map((face) => encodeImageAsDataUrl(face.imagePath));
     const { variations, postProcessing } = await applyPostProcessing(rawVariations, traits, signal);
     const maxScore = 12;
@@ -119,16 +172,22 @@ export async function orchestrateFaceGeneration(inputData = {}, { signal } = {})
       status: "success",
       variations,
       metadata: {
+        modality_1: "Physical Hair Evidence Record",
+        modality_2: "Synthetic Genomic Profile (HIrisPlex-S)",
+        fusion_engine: "Bayesian Weighted Log-Opinion Pool",
         traits_used: traits,
         hirisplex_probabilities: phenotypeMetadata.probabilities,
-        model: "kaggle-gallery-fallback",
-        source: kaggleGalleryDir,
+        model: "gallery-matching",
+        source: activeGalleryDir,
+        selected_files: selectedFaces.map(f => f.file),
         confidence_scores: confidenceScores,
         post_processing: postProcessing,
+        attribute_fusion: fusionResult,
         forensic_disclaimer:
           "This composite is a probabilistic phenotypic representation and does NOT constitute positive biometric identification.",
       },
     };
+
   }
 
 
