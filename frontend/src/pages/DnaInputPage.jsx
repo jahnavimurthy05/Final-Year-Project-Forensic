@@ -159,6 +159,7 @@ export default function DnaInputPage() {
               </div>
             </div>
 
+            {/* Face Shape — commented out, not used
             <div>
               <label className="block text-gray-400 text-sm mb-2">Face Shape</label>
               <select
@@ -171,6 +172,7 @@ export default function DnaInputPage() {
                 ))}
               </select>
             </div>
+            */}
 
             <div>
               <label className="block text-gray-400 text-sm mb-2">Skin Tone</label>

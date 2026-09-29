@@ -12,8 +12,9 @@ test("normalizeTraits maps known aliases to canonical keys", () => {
 });
 
 test("normalizeTraits drops empty/null/undefined values", () => {
-  const result = normalizeTraits({ eyeColor: "", hairColor: null, skinTone: undefined, faceShape: "oval" });
-  assert.deepEqual(result, { faceShape: "oval" });
+  // faceShape removed from this test — not used
+  const result = normalizeTraits({ eyeColor: "", hairColor: null, skinTone: undefined /*, faceShape: "oval"*/ });
+  assert.deepEqual(result, {});
 });
 
 test("normalizeTraits trims and lowercases values", () => {

@@ -8,7 +8,7 @@ export const SNP_MARKERS = [
 export const TRAIT_OPTIONS = {
   hairColor: ["Black", "Brown", "Blonde", "Red"],
   eyeColor: ["Brown", "Blue", "Green", "Hazel"],
-  faceShape: ["Oval", "Round", "Square", "Heart"],
+  // faceShape: ["Oval", "Round", "Square", "Heart"],  // commented out — not used
   cheekbone: ["Low", "Medium", "High"],
   skinTone: ["Fair", "Medium", "Olive", "Brown", "Dark"],
 };
@@ -60,7 +60,7 @@ async function generateWithGemini() {
 Generate a JSON object representing a synthetic forensic DNA profile.
 It should include:
 1. "snpMarkers": An array of 4 objects with "marker" (e.g. rs12913832) and "allele" (e.g. AG).
-2. "traits": An object containing predicted "hairColor" (Black, Brown, Blonde, Red), "eyeColor" (Brown, Blue, Green, Hazel), "faceShape" (Oval, Round, Square, Heart), "cheekbone" (Low, Medium, High), and "skinTone" (Fair, Medium, Olive, Brown, Dark).
+2. "traits": An object containing predicted "hairColor" (Black, Brown, Blonde, Red), "eyeColor" (Brown, Blue, Green, Hazel), "cheekbone" (Low, Medium, High), and "skinTone" (Fair, Medium, Olive, Brown, Dark).
 Return ONLY valid JSON.
 `;
 
@@ -104,7 +104,7 @@ function generateFallbackProfile() {
     traits: {
       hairColor: choice(TRAIT_OPTIONS.hairColor),
       eyeColor: choice(TRAIT_OPTIONS.eyeColor),
-      faceShape: choice(TRAIT_OPTIONS.faceShape),
+      // faceShape: choice(TRAIT_OPTIONS.faceShape),  // commented out — not used
       cheekbone: choice(TRAIT_OPTIONS.cheekbone),
       skinTone: choice(TRAIT_OPTIONS.skinTone),
     },

@@ -9,7 +9,7 @@ export function DnaProvider({ children }) {
       sex: 'male',
       hairColor: 'black',
       eyeColor: 'brown',
-      faceShape: 'oval',
+      // faceShape: 'oval',  // commented out — not used
       cheekbone: 'high',
       skinTone: 'medium',
       observedHairColor: 'black',  // Modality 1: Physical Hair Evidence Record

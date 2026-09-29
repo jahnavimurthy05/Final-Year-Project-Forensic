@@ -140,7 +140,7 @@ TRAIT_KEYS = {
     "skinTone": "skinTone",   "skin_tone": "skinTone",
     "sex": "sex",             "gender": "sex",
     "age": "ageRange",        "ageRange": "ageRange",
-    "faceShape": "faceShape", "face_shape": "faceShape",
+    # "faceShape": "faceShape", "face_shape": "faceShape",  # commented out — not used
     "cheekbone": "cheekboneStructure",
     "cheekboneShape": "cheekboneStructure",
     "cheekboneStructure": "cheekboneStructure",
