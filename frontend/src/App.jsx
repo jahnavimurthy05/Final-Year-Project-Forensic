@@ -13,7 +13,7 @@ import Navbar from './components/Navbar';
 function App() {
   return (
     <DnaProvider>
-      <Router>
+      <Router basename={import.meta.env.BASE_URL}>
         <div className="flex flex-col min-h-screen">
           <Navbar />
           <main className="flex-grow">
