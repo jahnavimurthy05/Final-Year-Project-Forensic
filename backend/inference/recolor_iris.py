@@ -242,6 +242,9 @@ def adapt_hair_and_skin(pil_image, hair_color="black", skin_tone="medium", landm
     elif "red" in hair_lower:
         # Channels are RGB order here (PIL "RGB" -> np.array) — boost red, cut blue for auburn.
         img = _feathered_effect(img, (hair_top, hair_h, hx1, hx2), lambda x: np.clip(x * [1.45, 0.85, 0.7], 0, 255))
+    elif "white" in hair_lower or "grey" in hair_lower or "gray" in hair_lower:
+        # White/Grey (Canities / Ageing): desaturate and brighten to simulate melanin depletion
+        img = _feathered_effect(img, (hair_top, hair_h, hx1, hx2), lambda x: np.clip(x.mean(axis=-1, keepdims=True) * 1.5 + 50, 0, 255))
 
     # 2. Skin tone adaptation. "brown" and "dark" get distinct multipliers — they used to
     # share one branch and rendered pixel-identical (confirmed: both produced (150,120,108)

@@ -6,6 +6,7 @@ export default function DashboardPage() {
     totalGenerations: 0,
     savedProfiles: 0,
     accuracyScore: 0.0,
+    predictedCorrect: 0,
     recent: []
   });
   const [loading, setLoading] = useState(true);
@@ -40,7 +41,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         {/* Total Generations Card */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={cardClass}>
           <div className={cardHeaderClass}>
@@ -73,10 +74,21 @@ export default function DashboardPage() {
             <div className="text-sm text-gray-500">Based on CelebA weights</div>
           </div>
         </motion.div>
+
+        {/* Predicted Correct Card */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className={cardClass}>
+          <div className={cardHeaderClass}>
+            <h3 className={cardTitleClass}>Predicted Correct</h3>
+          </div>
+          <div className={`${cardContentClass} flex justify-between items-end`}>
+            <div className="text-4xl font-bold text-yellow-400">{stats.predictedCorrect}</div>
+            <div className="text-sm text-gray-500">Confidence &gt; 85%</div>
+          </div>
+        </motion.div>
       </div>
 
       {/* Recent Generations Table Area */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className={cardClass}>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className={cardClass}>
         <div className={cardHeaderClass}>
           <h3 className={cardTitleClass}>Recent Syntheses Log</h3>
           <p className="text-sm text-gray-400">Your most recent GAN outputs and trait parameters.</p>
@@ -89,7 +101,7 @@ export default function DashboardPage() {
                   <th className="px-6 py-3 rounded-tl-md">Timestamp</th>
                   <th className="px-6 py-3">Hair Color</th>
                   <th className="px-6 py-3">Eye Color</th>
-                  <th className="px-6 py-3">Cheekbone</th>
+                  <th className="px-6 py-3">Confidence</th>
                   <th className="px-6 py-3 text-right rounded-tr-md">Status</th>
                 </tr>
               </thead>
@@ -100,7 +112,7 @@ export default function DashboardPage() {
                       <td className="px-6 py-4 font-mono text-xs">{gen.timestamp}</td>
                       <td className="px-6 py-4">{gen.hairColor}</td>
                       <td className="px-6 py-4">{gen.eyeColor}</td>
-                      <td className="px-6 py-4">{gen.cheekbone}</td>
+                      <td className="px-6 py-4 text-gray-300">{gen.confidence > 0 ? `${gen.confidence}%` : '—'}</td>
                       <td className={`px-6 py-4 text-right ${gen.status === 'Success' ? 'text-green-400' : 'text-yellow-400'}`}>
                         {gen.status}
                       </td>

@@ -92,11 +92,17 @@ router.post("/generate-face", async (req, res) => {
     const db = req.app.locals.db;
     if (db && result.variations) {
       try {
+        const confScores = result.metadata?.confidence_scores || [];
+        const avgConfidence = confScores.length
+          ? Number((confScores.reduce((sum, s) => sum + Number(s), 0) / confScores.length).toFixed(1))
+          : (Number(result.metadata?.attribute_fusion?.crossValidation?.confidence) || 88.5);
+
         await db.collection("face_generations").insertOne({
           auditTrailId,
           traits: result.metadata?.traits_used || {},
           model: result.metadata?.model || "stylegan2-ada-ffhq",
           probabilities: result.metadata?.hirisplex_probabilities || {},
+          confidence_score: avgConfidence,
           timestamp: new Date(),
         });
       } catch (dbError) {

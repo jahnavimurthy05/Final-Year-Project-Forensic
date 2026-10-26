@@ -5,8 +5,8 @@ import { generateSyntheticDna as fetchDnaProfile } from '../services/api';
 import { useDna } from '../context/DnaContext';
 
 // ─── Utility ─────────────────────────────────────────────────────────────────
-const HAIR_CLASSES = ['black', 'brown', 'blonde', 'red'];
-const HAIR_DOTS = { black: '#1a1a1a', brown: '#7b4f2e', blonde: '#d4a854', red: '#b03030' };
+const HAIR_CLASSES = ['black', 'brown', 'blonde', 'red', 'white'];
+const HAIR_DOTS = { black: '#1a1a1a', brown: '#7b4f2e', blonde: '#d4a854', red: '#b03030', white: '#e2e8f0' };
 
 /**
  * Client-side Bayesian attribute fusion preview.
@@ -15,9 +15,23 @@ const HAIR_DOTS = { black: '#1a1a1a', brown: '#7b4f2e', blonde: '#d4a854', red: 
  */
 function computeFusionPreview(observedHairColor, dnaHairProbs = {}) {
   const obs = (observedHairColor || 'brown').toLowerCase();
-  const wDna = 0.60;
-  const wHair = 0.40;
-  const gamma = 0.85;
+  const dnaTop = Object.entries(dnaHairProbs).reduce((a, b) => b[1] > a[1] ? b : a, ['unknown', 0])[0];
+
+  // Forensic Canities / Ageing Reconciler:
+  if (obs === 'white' || obs === 'grey' || obs === 'gray') {
+    return {
+      fused: { ...dnaHairProbs, white: 0.90 },
+      fusedColor: 'white',
+      dnaTop,
+      concordant: true,
+      isCanities: true,
+    };
+  }
+
+  // Must mirror attribute_fusion_service.js: DNA is dominant (0.80), physical is weak prior (0.20)
+  const wDna = 0.80;
+  const wHair = 0.20;
+  const gamma = 0.50;   // physical evidence is a weak prior
   const residual = (1 - gamma) / (HAIR_CLASSES.length - 1);
 
   let total = 0;
@@ -37,9 +51,8 @@ function computeFusionPreview(observedHairColor, dnaHairProbs = {}) {
     if (fused[c] > maxP) { maxP = fused[c]; best = c; }
   });
 
-  const dnaTop = Object.entries(dnaHairProbs).reduce((a, b) => b[1] > a[1] ? b : a, ['unknown', 0])[0];
   const concordant = dnaTop === obs;
-  return { fused, fusedColor: best, dnaTop, concordant };
+  return { fused, fusedColor: best, dnaTop, concordant, isCanities: false };
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -54,7 +67,13 @@ export default function DnaInputPage() {
 
   const fusion = computeFusionPreview(observedHair, dnaHairProbs);
 
-  const handleTraitChange = (key, value) => updateTraits({ [key]: value });
+  const handleTraitChange = (key, value) => {
+    if (key === 'observedHairColor' || key === 'hairColor') {
+      updateTraits({ observedHairColor: value, hairColor: value });
+    } else {
+      updateTraits({ [key]: value });
+    }
+  };
 
   const generateSyntheticDna = async () => {
     setIsLoading(true);
@@ -67,7 +86,7 @@ export default function DnaInputPage() {
           { marker: 'rs12913832', allele: 'AG' },
           { marker: 'rs1800407',  allele: 'GG' },
         ],
-        traits: { hairColor: 'brown', eyeColor: 'hazel', skinTone: 'medium', observedHairColor: 'brown' },
+        traits: { hairColor: observedHair, eyeColor: 'hazel', skinTone: 'medium', observedHairColor: observedHair },
       });
     } finally {
       setIsLoading(false);
@@ -107,7 +126,7 @@ export default function DnaInputPage() {
               <label className="block text-gray-400 text-sm mb-2">
                 Observed Hair Colour <span className="text-amber-400 text-xs">(crime-scene record)</span>
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {HAIR_CLASSES.map((c) => (
                   <button
                     key={c}
@@ -139,17 +158,20 @@ export default function DnaInputPage() {
               </div>
             </div>
 
-            {/* Other morphological traits */}
+            {/* Observed Physical Sex */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2">Biological Sex</label>
+              <label className="block text-gray-400 text-sm mb-2">
+                Observed Sex <span className="text-amber-400 text-xs">(witness / scene observation)</span>
+              </label>
               <div className="grid grid-cols-2 gap-2">
                 {['male', 'female'].map((opt) => (
                   <button
                     key={opt}
+                    type="button"
                     onClick={() => handleTraitChange('sex', opt)}
                     className={`py-2 rounded-lg border-2 font-bold text-sm capitalize transition-all duration-200 ${
                       dnaState.traits.sex === opt
-                        ? 'border-cyberBlue bg-cyberBlue/20 text-cyberBlue shadow-[0_0_12px_#00d2ff]'
+                        ? 'border-amber-400 bg-amber-400/20 text-amber-300 shadow-[0_0_12px_#fbbf24]'
                         : 'border-gray-700 bg-darkBg text-gray-400 hover:border-gray-500'
                     }`}
                   >
@@ -213,6 +235,29 @@ export default function DnaInputPage() {
             Forensic SNP markers (rs12913832, rs1800407, …) extracted from the hair follicle root.
             Privacy-safe synthetic equivalents are generated via the HIrisPlex-S protocol.
           </p>
+
+          {/* DNA Biological Sex Selector / Indicator */}
+          <div className="mb-4 bg-darkBg p-3 rounded border border-gray-800">
+            <label className="block text-gray-400 text-xs font-mono mb-2">
+              DNA Biological Sex (Chromosomal AMEL Locus)
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {['male', 'female'].map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => handleTraitChange('dnaSex', opt)}
+                  className={`py-1.5 rounded border text-xs font-mono font-bold capitalize transition-all ${
+                    (dnaState.traits.dnaSex || 'male') === opt
+                      ? 'border-cyberPurple bg-cyberPurple/20 text-cyberPurple shadow-[0_0_10px_rgba(180,90,255,0.3)]'
+                      : 'border-gray-800 text-gray-500 hover:border-gray-700'
+                  }`}
+                >
+                  {opt === 'male' ? '♂ Male (XY)' : '♀ Female (XX)'}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* SNP marker display */}
           <div className="bg-darkBg p-4 rounded border border-gray-800 min-h-[80px] font-mono text-xs text-cyberBlue flex flex-col justify-center gap-1 mb-4">
@@ -286,16 +331,37 @@ export default function DnaInputPage() {
                   {fusion.concordant ? '✅' : '⚠️'}
                 </span>
                 <span className={`text-sm font-bold font-mono ${fusion.concordant ? 'text-green-400' : 'text-red-400'}`}>
-                  {fusion.concordant ? 'CONCORDANT — VERIFIED' : 'DISCORDANCE DETECTED'}
+                  {fusion.isCanities
+                    ? 'CANITIES VERIFIED (AGE RECONCILED)'
+                    : fusion.concordant
+                    ? 'CONCORDANT — VERIFIED'
+                    : 'DISCORDANCE DETECTED'}
                 </span>
               </div>
               <p className="text-xs text-gray-400">
-                {fusion.concordant
+                {fusion.isCanities
+                  ? `Physical evidence displays age-related white/grey hair (canities), while DNA reveals natural baseline (${fusion.dnaTop || 'dark'}). Composite reconciled with age-adjusted white/grey phenotype.`
+                  : fusion.concordant
                   ? `Physical evidence (${observedHair}) matches HIrisPlex-S genetic prediction (${fusion.dnaTop}). Composite confidence boosted.`
                   : `Physical evidence: ${observedHair} | DNA prediction: ${fusion.dnaTop || '—'}. Possible cosmetic alteration or DNA degradation.`
                 }
               </p>
             </motion.div>
+
+            {/* Sex Cross-Validation / Disguise Alert */}
+            {dnaState.traits.sex !== (dnaState.traits.dnaSex || 'male') ? (
+              <div className="rounded-lg p-3 border border-amber-500/40 bg-amber-500/10 mb-4 text-xs font-mono">
+                <span className="text-amber-300 font-bold">🕵️ DISGUISE DETECTED:</span>
+                <p className="mt-1 text-gray-300">
+                  Suspect is a <strong className="text-cyberPurple capitalize">{dnaState.traits.dnaSex || 'male'} ({dnaState.traits.dnaSex === 'female' ? 'XX' : 'XY'})</strong> disguised with <strong className="text-amber-300 capitalize">{dnaState.traits.sex} presentation</strong>.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-lg p-2.5 border border-green-500/30 bg-green-500/5 mb-4 text-xs font-mono text-green-400 flex items-center gap-2">
+                <span>✅</span>
+                <span>Sex Concordant: Witness observation matches DNA biological sex ({dnaState.traits.sex}).</span>
+              </div>
+            )}
 
             {/* Fused probability bars */}
             <div className="space-y-2 mb-4">

@@ -168,6 +168,20 @@ export async function orchestrateFaceGeneration(inputData = {}, { signal } = {})
       return normalizedPct.toFixed(1);
     });
 
+    const witnessSex = (rawTraits.sex || traits.sex || 'male').toLowerCase();
+    const dnaSex = (rawTraits.dnaSex || phenotypePrediction.traits?.sex || traits.sex || 'male').toLowerCase();
+    const isDisguised = witnessSex !== dnaSex;
+
+    const disguiseAnalysis = {
+      isDisguised,
+      witnessSex,
+      dnaSex,
+      dnaAmelogenin: dnaSex === 'male' ? 'XY' : 'XX',
+      message: isDisguised
+        ? `Suspect is a ${dnaSex.toUpperCase()} (${dnaSex === 'male' ? 'XY' : 'XX'}) disguised with ${witnessSex.toUpperCase()} presentation.`
+        : `Biological sex (${dnaSex.toUpperCase()} ${dnaSex === 'male' ? 'XY' : 'XX'}) matches physical observation.`,
+    };
+
     return {
       status: "success",
       variations,
@@ -183,6 +197,7 @@ export async function orchestrateFaceGeneration(inputData = {}, { signal } = {})
         confidence_scores: confidenceScores,
         post_processing: postProcessing,
         attribute_fusion: fusionResult,
+        disguise: disguiseAnalysis,
         forensic_disclaimer:
           "This composite is a probabilistic phenotypic representation and does NOT constitute positive biometric identification.",
       },

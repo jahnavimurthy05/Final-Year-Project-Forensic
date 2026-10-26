@@ -57,8 +57,6 @@ export function selectGalleryFaces(gallery, requestedTraits, count = 4) {
   const requestedSex = (requestedTraits?.sex || '').trim().toLowerCase();
 
   // Hard pre-filter by sex — sex must match exactly before any scoring.
-  // This guarantees male selection never shows female faces and vice versa,
-  // regardless of scoring weights or edge-case metadata issues.
   let candidates = gallery;
   if (requestedSex) {
     const bySex = gallery.filter(
@@ -69,7 +67,6 @@ export function selectGalleryFaces(gallery, requestedTraits, count = 4) {
     }
   }
 
-  // Score candidates by ALL remaining traits (sex excluded — already filtered)
   const traitsWithoutSex = { ...requestedTraits };
   delete traitsWithoutSex.sex;
 
@@ -78,14 +75,9 @@ export function selectGalleryFaces(gallery, requestedTraits, count = 4) {
     return { ...face, score };
   });
 
-  // Sort by score descending — highest match first
   scored.sort((a, b) => b.score - a.score);
 
-  // Always include the top `count` matches. Then shuffle a wider pool and
-  // backfill with variety from lower-ranked faces if count > top matches.
   const topFaces = scored.slice(0, count);
-
-  // Shuffle the remainder (lower-ranked) for variety in backfill
   const remainder = scored.slice(count);
   for (let i = remainder.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

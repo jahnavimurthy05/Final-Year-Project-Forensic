@@ -6,7 +6,7 @@ export const SNP_MARKERS = [
 ];
 
 export const TRAIT_OPTIONS = {
-  hairColor: ["Black", "Brown", "Blonde", "Red"],
+  hairColor: ["Black", "Brown", "Blonde", "Red", "White"],
   eyeColor: ["Brown", "Blue", "Green", "Hazel"],
   // faceShape: ["Oval", "Round", "Square", "Heart"],  // commented out — not used
   cheekbone: ["Low", "Medium", "High"],
@@ -96,12 +96,20 @@ Return ONLY valid JSON.
 }
 
 function generateFallbackProfile() {
+  const sex = choice(["male", "female"]);
+  const amelAllele = sex === "male" ? "XY" : "XX";
+
   return {
-    snpMarkers: SNP_MARKERS.map(({ marker, alleles }) => ({
-      marker,
-      allele: choice(alleles),
-    })),
+    snpMarkers: [
+      { marker: "AMEL (Sex)", allele: amelAllele },
+      ...SNP_MARKERS.map(({ marker, alleles }) => ({
+        marker,
+        allele: choice(alleles),
+      })),
+    ],
     traits: {
+      sex,
+      amelogenin: amelAllele,
       hairColor: choice(TRAIT_OPTIONS.hairColor),
       eyeColor: choice(TRAIT_OPTIONS.eyeColor),
       // faceShape: choice(TRAIT_OPTIONS.faceShape),  // commented out — not used

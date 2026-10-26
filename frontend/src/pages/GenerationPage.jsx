@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { generateFaceVariations } from '../services/api';
 import { useDna } from '../context/DnaContext';
 
-const HAIR_DOTS = { black: '#1a1a1a', brown: '#7b4f2e', blonde: '#d4a854', red: '#b03030' };
+const HAIR_DOTS = { black: '#1a1a1a', brown: '#7b4f2e', blonde: '#d4a854', red: '#b03030', white: '#e2e8f0' };
 
 export default function GenerationPage() {
   const { dnaState } = useDna();
@@ -46,8 +46,11 @@ export default function GenerationPage() {
       {/* ── Pre-generation trait summary ─────────────────────────────────────── */}
       <div className="flex flex-wrap gap-4 justify-center mb-6 glass-panel px-6 py-3 rounded-full border border-gray-700">
         <span className="text-sm font-mono text-gray-300">
-          {dnaState.traits.sex === 'female' ? '♀' : '♂'}{' '}
-          <strong className="text-cyberBlue capitalize">{dnaState.traits.sex || 'Male'}</strong>
+          Witness Sex: <strong className="text-amber-400 capitalize">{dnaState.traits.sex || 'Male'}</strong>
+        </span>
+        <span className="text-gray-600">•</span>
+        <span className="text-sm font-mono text-gray-300">
+          DNA Biological Sex: <strong className="text-cyberPurple capitalize">{dnaState.traits.dnaSex || 'Male'} ({(dnaState.traits.dnaSex || 'male') === 'female' ? 'XX' : 'XY'})</strong>
         </span>
         <span className="text-gray-600">•</span>
         <span className="text-sm font-mono text-gray-300">
@@ -237,6 +240,23 @@ export default function GenerationPage() {
             </button>
           </div>
 
+          {/* ── Disguise Alert Banner ────────────────────────────────────────── */}
+          {metadata?.disguise?.isDisguised && (
+            <div className="mb-6 p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 w-full text-left">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xl">🕵️</span>
+                <span className="font-bold font-mono text-sm text-amber-300">
+                  DISGUISE DETECTED: {metadata.disguise.message}
+                </span>
+              </div>
+              <p className="text-xs text-gray-300 font-mono">
+                Chromosomal DNA Amelogenin locus confirms <strong className="text-cyberPurple capitalize">{metadata.disguise.dnaSex} ({metadata.disguise.dnaAmelogenin})</strong>,
+                while witness observation documented <strong className="text-amber-300 capitalize">{metadata.disguise.witnessSex} presentation</strong>.
+              </p>
+            </div>
+          )}
+
+          {/* ── 4 Face Variations Output ──────────────────────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {images.map((img, idx) => (
               <motion.div
