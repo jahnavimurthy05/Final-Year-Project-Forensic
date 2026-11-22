@@ -13,9 +13,11 @@
     "@heroicons/react": "^2.2.0",
     "axios": "^1.16.1",
     "framer-motion": "^12.40.0",
+    "lucide-react": "^1.77.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-router-dom": "^7.15.1"
+    "react-router-dom": "^7.15.1",
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

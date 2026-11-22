@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { generateSyntheticDna as fetchDnaProfile } from '../services/api';
 import { useDna } from '../context/DnaContext';
+import LiquidButton from '../components/ui/LiquidButton';
+import { Dna, ArrowRight, Sparkles } from 'lucide-react';
 
 // ─── Utility ─────────────────────────────────────────────────────────────────
 const HAIR_CLASSES = ['black', 'brown', 'blonde', 'red', 'white'];
@@ -293,13 +295,15 @@ export default function DnaInputPage() {
             </div>
           )}
 
-          <button
+          <LiquidButton
             onClick={generateSyntheticDna}
             disabled={isLoading}
-            className="w-full py-3 bg-transparent border-2 border-cyberPurple text-cyberPurple hover:bg-cyberPurple hover:text-white font-bold rounded transition-colors disabled:opacity-50"
+            variant="purple"
+            className="w-full py-3.5 mt-2"
+            icon={<Dna className="w-4 h-4 text-purple-400" />}
           >
-            {isLoading ? '⏳ Synthesizing SNP Profile...' : '🧬 Synthesize HIrisPlex-S Markers'}
-          </button>
+            {isLoading ? 'Synthesizing SNP Profile...' : 'Synthesize HIrisPlex-S Markers'}
+          </LiquidButton>
         </div>
 
         {/* ── ATTRIBUTE FUSION STATUS ──────────────────────────────────────────── */}
@@ -398,12 +402,16 @@ export default function DnaInputPage() {
           </div>
 
           {/* Proceed button */}
-          <button
-            onClick={() => navigate('/generate')}
-            className="w-full py-4 mt-6 bg-cyberBlue text-darkBg font-bold text-lg rounded shadow-[0_0_15px_#00d2ff] hover:scale-105 transition-transform"
-          >
-            Proceed to Facial Synthesis →
-          </button>
+          <div className="mt-6">
+            <LiquidButton
+              onClick={() => navigate('/generate')}
+              variant="teal"
+              className="w-full py-4 text-base shadow-[0_0_20px_rgba(20,184,166,0.35)]"
+              icon={<ArrowRight className="w-5 h-5 text-teal-300" />}
+            >
+              Proceed to Facial Synthesis →
+            </LiquidButton>
+          </div>
         </div>
       </div>
     </div>

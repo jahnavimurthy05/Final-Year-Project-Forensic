@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { generateFaceVariations } from '../services/api';
 import { useDna } from '../context/DnaContext';
+import LiquidButton from '../components/ui/LiquidButton';
+import ParticleFaceMorph from '../components/ui/ParticleFaceMorph';
+import { Orbit, Sparkles } from 'lucide-react';
 
 const HAIR_DOTS = { black: '#1a1a1a', brown: '#7b4f2e', blonde: '#d4a854', red: '#b03030', white: '#e2e8f0' };
 
@@ -11,6 +14,7 @@ export default function GenerationPage() {
   const [images, setImages] = useState([]);
   const [metadata, setMetadata] = useState(null);
   const [selectedAnalysis, setSelectedAnalysis] = useState(null);
+  const [activeMorphIndex, setActiveMorphIndex] = useState(null);
 
   const generateFaces = async () => {
     setIsGenerating(true);
@@ -97,12 +101,16 @@ export default function GenerationPage() {
 
       {/* ── Generate button ───────────────────────────────────────────────────── */}
       {!isGenerating && images.length === 0 && (
-        <button
-          onClick={generateFaces}
-          className="px-10 py-4 bg-cyberBlue text-darkBg font-bold text-xl rounded shadow-[0_0_20px_#00d2ff] hover:scale-105 transition-transform"
-        >
-          Synthesize Suspect Composites
-        </button>
+        <div className="flex flex-col items-center">
+          <LiquidButton
+            onClick={generateFaces}
+            variant="teal"
+            className="text-lg px-10 py-4 shadow-[0_0_25px_rgba(20,184,166,0.35)]"
+            icon={<Sparkles className="w-5 h-5 text-teal-300" />}
+          >
+            Synthesize Suspect Composites
+          </LiquidButton>
+        </div>
       )}
 
       {/* ── Spinner ───────────────────────────────────────────────────────────── */}
@@ -276,12 +284,22 @@ export default function GenerationPage() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
                   />
                 </div>
-                <button
-                  onClick={() => setSelectedAnalysis(idx)}
-                  className="w-full py-2 bg-transparent border border-gray-600 rounded text-sm hover:border-cyberBlue hover:text-cyberBlue transition-colors mt-auto"
-                >
-                  View Forensic Audit
-                </button>
+                <div className="w-full flex flex-col gap-2 mt-auto">
+                  <button
+                    onClick={() => setActiveMorphIndex(idx)}
+                    className="w-full py-1.5 px-3 bg-teal-500/10 border border-teal-500/40 rounded-lg text-xs font-mono text-teal-300 hover:bg-teal-500/20 hover:border-teal-400 transition-all flex items-center justify-center gap-1.5 group/btn"
+                  >
+                    <Orbit className="w-3.5 h-3.5 text-teal-400 group-hover/btn:rotate-45 transition-transform" />
+                    <span>Three.js 3D Morph</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedAnalysis(idx)}
+                    className="w-full py-1.5 bg-transparent border border-slate-700 dark:border-gray-600 rounded-lg text-xs hover:border-cyberBlue hover:text-cyberBlue transition-colors"
+                  >
+                    View Forensic Audit
+                  </button>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -388,6 +406,23 @@ export default function GenerationPage() {
                 </div>
               </>
             )}
+          </motion.div>
+        </div>
+      )}
+
+      {/* ── Three.js TSL Particle Morph Modal ────────────────────────────────────── */}
+      {activeMorphIndex !== null && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-xl my-4"
+          >
+            <ParticleFaceMorph
+              imageUrl={images[activeMorphIndex]}
+              title={`Variation ${activeMorphIndex + 1} — Three.js TSL Particle Morph`}
+              onClose={() => setActiveMorphIndex(null)}
+            />
           </motion.div>
         </div>
       )}

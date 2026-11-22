@@ -47,9 +47,17 @@ export default function RegisterPage() {
       >
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="text-4xl mb-2">🧬</div>
-          <h2 className="text-3xl font-bold neon-text">Create Account</h2>
-          <p className="text-gray-500 text-sm mt-1">Forensic Face Generation System</p>
+          <img
+            src={`${import.meta.env.BASE_URL}forenai-icon.png`}
+            alt="ForenAI"
+            className="w-16 h-16 mx-auto mb-3 rounded-2xl shadow-[0_0_20px_rgba(20,184,166,0.35)] border border-teal-500/30"
+          />
+          <h2 className="text-3xl font-extrabold tracking-wider text-white">
+            Create Account
+          </h2>
+          <p className="text-gray-400 font-mono text-xs mt-1 tracking-widest uppercase">
+            Foren<span className="text-cyan-400">AI</span> &bull; DNA &bull; Analyze &bull; Reconstruct
+          </p>
         </div>
 
         {/* Success banner */}

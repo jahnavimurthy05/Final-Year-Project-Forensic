@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { loginUser } from '../services/api';
 import { motion } from 'framer-motion';
+import LiquidButton from '../components/ui/LiquidButton';
+import { ShieldCheck, LogIn } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail]       = useState('');
@@ -40,9 +42,17 @@ export default function LoginPage() {
       >
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="text-4xl mb-2">🔐</div>
-          <h2 className="text-3xl font-bold neon-text">Agent Login</h2>
-          <p className="text-gray-500 text-sm mt-1">Forensic Face Generation System</p>
+          <img
+            src={`${import.meta.env.BASE_URL}forenai-icon.png`}
+            alt="ForenAI"
+            className="w-16 h-16 mx-auto mb-3 rounded-2xl shadow-[0_0_20px_rgba(20,184,166,0.35)] border border-teal-500/30"
+          />
+          <h2 className="text-3xl font-extrabold tracking-wider text-white">
+            Foren<span className="text-cyan-400">AI</span>
+          </h2>
+          <p className="text-gray-400 font-mono text-xs mt-1 tracking-widest uppercase">
+            DNA &bull; Analyze &bull; Reconstruct
+          </p>
         </div>
 
         {/* Error */}
@@ -59,13 +69,13 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="space-y-5">
           {/* Email */}
           <div>
-            <label className="block text-gray-400 text-sm mb-1">Email Address</label>
+            <label className="block text-slate-700 dark:text-gray-300 text-xs font-mono mb-1">Email Address</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="agent@forensic.gov"
-              className="w-full bg-darkBg border border-gray-700 rounded-lg p-3 text-white placeholder-gray-600 focus:border-cyberBlue focus:outline-none transition-colors"
+              className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-gray-700 rounded-xl p-3 text-slate-900 dark:text-white placeholder-gray-500 focus:border-teal-500 focus:outline-none transition-colors text-sm"
               required
               autoFocus
             />
@@ -73,32 +83,29 @@ export default function LoginPage() {
 
           {/* Password */}
           <div>
-            <label className="block text-gray-400 text-sm mb-1">Password</label>
+            <label className="block text-slate-700 dark:text-gray-300 text-xs font-mono mb-1">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full bg-darkBg border border-gray-700 rounded-lg p-3 text-white placeholder-gray-600 focus:border-cyberBlue focus:outline-none transition-colors"
+              className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-gray-700 rounded-xl p-3 text-slate-900 dark:text-white placeholder-gray-500 focus:border-teal-500 focus:outline-none transition-colors text-sm"
               required
             />
           </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 mt-2 bg-cyberBlue text-darkBg font-bold text-lg rounded-lg shadow-[0_0_15px_#00d2ff] hover:scale-[1.02] transition-transform disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <div className="w-5 h-5 border-t-2 border-darkBg rounded-full animate-spin" />
-                Authenticating…
-              </>
-            ) : (
-              '🔓 Login'
-            )}
-          </button>
+          {/* Submit with Liquid Button */}
+          <div className="pt-2">
+            <LiquidButton
+              type="submit"
+              disabled={loading}
+              variant="teal"
+              className="w-full py-3.5 shadow-[0_0_20px_rgba(20,184,166,0.3)] text-base"
+              icon={<LogIn className="w-4 h-4 text-teal-400" />}
+            >
+              {loading ? 'Authenticating Operative...' : 'Access Platform'}
+            </LiquidButton>
+          </div>
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-500">
