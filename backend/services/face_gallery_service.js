@@ -18,12 +18,19 @@ const DEFAULT_TRAIT_WEIGHTS = {
   eyebrowDistance: 1,
 };
 
+const galleryCache = new Map();
+
 export function loadFaceGallery(galleryDir) {
   if (!galleryDir || !existsSync(galleryDir)) {
     return [];
   }
 
-  const metadataPath = path.join(galleryDir, "metadata.json");
+  const resolvedDir = path.resolve(galleryDir);
+  if (galleryCache.has(resolvedDir)) {
+    return galleryCache.get(resolvedDir);
+  }
+
+  const metadataPath = path.join(resolvedDir, "metadata.json");
   if (!existsSync(metadataPath)) {
     return [];
   }
@@ -31,15 +38,15 @@ export function loadFaceGallery(galleryDir) {
   const rawItems = JSON.parse(readFileSync(metadataPath, "utf-8"));
   const items = Array.isArray(rawItems) ? rawItems : rawItems.faces || [];
 
-  return items
+  const result = items
     .map((item) => {
       const file = item.file || item.image || item.filename;
       if (!file) {
         return null;
       }
 
-      const imagePath = path.resolve(galleryDir, file);
-      if (!imagePath.startsWith(path.resolve(galleryDir)) || !existsSync(imagePath)) {
+      const imagePath = path.resolve(resolvedDir, file);
+      if (!imagePath.startsWith(resolvedDir) || !existsSync(imagePath)) {
         return null;
       }
 
@@ -51,6 +58,9 @@ export function loadFaceGallery(galleryDir) {
       };
     })
     .filter(Boolean);
+
+  galleryCache.set(resolvedDir, result);
+  return result;
 }
 
 export function selectGalleryFaces(gallery, requestedTraits, count = 4) {
@@ -77,14 +87,64 @@ export function selectGalleryFaces(gallery, requestedTraits, count = 4) {
 
   scored.sort((a, b) => b.score - a.score);
 
-  const topFaces = scored.slice(0, count);
-  const remainder = scored.slice(count);
-  for (let i = remainder.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [remainder[i], remainder[j]] = [remainder[j], remainder[i]];
+  function pickRandom(arr) {
+    if (!arr.length) return null;
+    return arr[Math.floor(Math.random() * arr.length)];
   }
 
-  return [...topFaces, ...remainder].slice(0, count);
+  const highMatches = scored.slice(0, Math.ceil(scored.length * 0.4));
+  const midMatches  = scored.slice(Math.ceil(scored.length * 0.4), Math.ceil(scored.length * 0.7));
+  const lowMatches  = scored.slice(Math.ceil(scored.length * 0.7));
+
+  const picks = [];
+  for (let i = 0; i < count; i++) {
+    if (i < 2) picks.push(pickRandom(highMatches));
+    else if (i === 2) picks.push(pickRandom(midMatches.length ? midMatches : highMatches));
+    else picks.push(pickRandom(lowMatches.length ? lowMatches : midMatches.length ? midMatches : highMatches));
+  }
+
+  return picks.filter(Boolean).slice(0, count);
+}
+
+// selectGalleryFacesTiered: picks exactly 3 faces from 3 score tiers
+// Face 0 → top 40% (high)  Face 1 → top 40% (high, different pick)  Face 2 → 40–70% (mid)
+export function selectGalleryFacesTiered(gallery, requestedTraits, count = 3) {
+  const requestedSex = (requestedTraits?.sex || '').trim().toLowerCase();
+
+  let candidates = gallery;
+  if (requestedSex) {
+    const bySex = gallery.filter(
+      (f) => (f.traits?.sex || '').trim().toLowerCase() === requestedSex
+    );
+    if (bySex.length >= count) {
+      candidates = bySex;
+    }
+  }
+
+  const traitsWithoutSex = { ...requestedTraits };
+  delete traitsWithoutSex.sex;
+
+  const scored = candidates.map((face) => {
+    const score = scoreTraits(face.traits || {}, traitsWithoutSex || {});
+    return { ...face, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+
+  function pickRandom(arr, exclude = []) {
+    const pool = arr.filter(f => !exclude.includes(f));
+    if (!pool.length) return arr[Math.floor(Math.random() * arr.length)] || null;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  const highMatches = scored.slice(0, Math.ceil(scored.length * 0.4));
+  const midMatches  = scored.slice(Math.ceil(scored.length * 0.4), Math.ceil(scored.length * 0.7));
+
+  const pick0 = pickRandom(highMatches);
+  const pick1 = pickRandom(highMatches, [pick0]);
+  const pick2 = pickRandom(midMatches.length ? midMatches : highMatches, [pick0, pick1]);
+
+  return [pick0, pick1, pick2].filter(Boolean).slice(0, count);
 }
 
 export function encodeImageAsDataUrl(imagePath) {

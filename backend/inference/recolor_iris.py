@@ -119,12 +119,23 @@ def _blend_ellipse(img, cx, cy, radius_x, radius_y, rgb_target, strength=0.8, mi
     roi = img[y1:y2, x1:x2].astype(float)
     my, mx = np.ogrid[: y2 - y1, : x2 - x1]
     dist = ((mx - (cx - x1)) ** 2 / (radius_x ** 2) + (my - (cy - y1)) ** 2 / (radius_y ** 2))
-    iris_mask = (dist <= 1.0).astype(float)[:, :, None]
+    
+    # Soft feathering at outer iris boundary to eliminate harsh sticker edges
+    iris_mask = np.clip((1.0 - dist) / 0.35, 0.0, 1.0)[:, :, None]
+    
+    # Preserve dark central pupil (dist < 0.20)
+    pupil_factor = np.clip((dist - 0.15) / 0.18, 0.0, 1.0)[:, :, None]
+    iris_mask = iris_mask * pupil_factor
 
-    recolored_roi = roi * (1 - mix) + np.array(rgb_target) * mix
-    img[y1:y2, x1:x2] = (roi * (1 - iris_mask * strength) + recolored_roi * (iris_mask * strength)).astype(
-        np.uint8
-    )
+    # Retain natural underlying iris luminance and specular eye reflections
+    luminance = (roi[:, :, 0] * 0.299 + roi[:, :, 1] * 0.587 + roi[:, :, 2] * 0.114) / 255.0
+    luminance = np.clip(luminance[:, :, None] * 1.35, 0.25, 1.25)
+
+    target_colored = np.array(rgb_target, dtype=float) * luminance
+    recolored_roi = roi * (1.0 - mix) + target_colored * mix
+    
+    blended = roi * (1.0 - iris_mask * strength) + recolored_roi * (iris_mask * strength)
+    img[y1:y2, x1:x2] = np.clip(blended, 0, 255).astype(np.uint8)
 
 
 def recolor_iris_vivid(pil_image, eye_color="brown", landmarks=None):
@@ -263,6 +274,27 @@ def adapt_hair_and_skin(pil_image, hair_color="black", skin_tone="medium", landm
 
 
 def process_phenotype_post_processing(pil_image, eye_color="brown", hair_color="black", skin_tone="medium"):
+    # Normalize framing: align any input (including square 224x224 Indian faces) to CelebA standard aspect (178x218)
+    target_w, target_h = 178, 218
+    target_aspect = target_w / target_h
+    w, h = pil_image.size
+    current_aspect = w / h
+
+    if abs(current_aspect - target_aspect) > 0.03:
+        if current_aspect > target_aspect:
+            # Image is wider than 178:218 (e.g. 224x224): center-crop width
+            new_w = int(round(h * target_aspect))
+            left = (w - new_w) // 2
+            pil_image = pil_image.crop((left, 0, left + new_w, h))
+        else:
+            # Image is taller: center-crop height
+            new_h = int(round(w / target_aspect))
+            top = (h - new_h) // 2
+            pil_image = pil_image.crop((0, top, w, top + new_h))
+
+    if pil_image.size != (target_w, target_h):
+        pil_image = pil_image.resize((target_w, target_h), Image.Resampling.LANCZOS)
+
     landmarks = detect_face_landmarks(pil_image)
     recolored = recolor_iris_vivid(pil_image, eye_color, landmarks)
     final_img = adapt_hair_and_skin(recolored, hair_color, skin_tone, landmarks)

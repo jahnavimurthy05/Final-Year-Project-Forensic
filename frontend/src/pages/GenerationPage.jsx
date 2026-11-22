@@ -257,26 +257,28 @@ export default function GenerationPage() {
           )}
 
           {/* ── 4 Face Variations Output ──────────────────────────────────────── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 items-stretch">
             {images.map((img, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: idx * 0.15 }}
-                className="glass-panel p-4 rounded-xl flex flex-col items-center relative group border border-gray-800 hover:border-cyberBlue/50 transition-colors"
+                className="glass-panel p-4 rounded-xl flex flex-col justify-between items-center relative group border border-gray-800 hover:border-cyberBlue/50 transition-colors h-full"
               >
                 <div className="absolute top-2 right-2 bg-darkBg/80 px-2 py-1 rounded text-xs text-cyberBlue font-mono border border-cyberBlue/30 z-10">
                   {metadata?.confidence_scores?.[idx] ? `${metadata.confidence_scores[idx]}% Match` : '91.4% Match'}
                 </div>
-                <img
-                  src={img}
-                  alt={`Variation ${idx + 1}`}
-                  className="w-full h-auto rounded object-cover mb-4 group-hover:scale-105 transition-all duration-300"
-                />
+                <div className="w-full aspect-[178/218] overflow-hidden rounded mb-4 bg-slate-950 flex items-center justify-center">
+                  <img
+                    src={img}
+                    alt={`Variation ${idx + 1}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                  />
+                </div>
                 <button
                   onClick={() => setSelectedAnalysis(idx)}
-                  className="w-full py-2 bg-transparent border border-gray-600 rounded text-sm hover:border-cyberBlue hover:text-cyberBlue transition-colors"
+                  className="w-full py-2 bg-transparent border border-gray-600 rounded text-sm hover:border-cyberBlue hover:text-cyberBlue transition-colors mt-auto"
                 >
                   View Forensic Audit
                 </button>

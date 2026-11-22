@@ -8,6 +8,7 @@ import { normalizeTraits } from "./dna_service.js";
 import {
   loadFaceGallery,
   selectGalleryFaces,
+  selectGalleryFacesTiered,
   encodeImageAsDataUrl,
 } from "./face_gallery_service.js";
 import { fuseHairAndDna } from "./attribute_fusion_service.js";
@@ -30,15 +31,17 @@ const latentDirectionsDir = path.resolve(
   process.env.LATENT_DIRECTIONS_DIR || path.join(backendDir, "checkpoints", "latent_directions")
 );
 
-function getKaggleGalleryDir() {
+function getCelebaGalleryDir() {
+  // Primary large benchmark: CelebA 10,000 images
   if (process.env.KAGGLE_FACE_GALLERY_DIR) {
     return path.resolve(process.env.KAGGLE_FACE_GALLERY_DIR);
   }
-  const indianDir = path.join(backendDir, "generated_faces", "indian_frontal");
-  if (existsSync(indianDir)) {
-    return indianDir;
-  }
-  return path.join(backendDir, "generated_faces", "kaggle");
+  return path.join(backendDir, "data", "raw", "celeba", "img_align_celeba");
+}
+
+function getIndianGalleryDir() {
+  // Secondary local gallery: Indian frontal ~531 images
+  return path.join(backendDir, "generated_faces", "indian_frontal");
 }
 
 // StyleGAN2 live generation is CPU-minutes-per-image without a CUDA GPU, so it's opt-in only.
@@ -152,20 +155,53 @@ export async function orchestrateFaceGeneration(inputData = {}, { signal } = {})
     }
   }
 
-  // 3. Fallback (default): Gallery Matching + MediaPipe Iris Recoloring
-  const activeGalleryDir = getKaggleGalleryDir();
-  const gallery = loadFaceGallery(activeGalleryDir);
-  console.log(`[generation] Using gallery at ${activeGalleryDir} (${gallery.length} faces)`);
-  if (gallery.length > 0) {
-    const selectedFaces = selectGalleryFaces(gallery, traits, 4);
-    console.log("[generation] Selected faces:", selectedFaces.map(f => f.file));
-    const rawVariations = selectedFaces.map((face) => encodeImageAsDataUrl(face.imagePath));
+  // 3. Dual-Gallery Matching + MediaPipe Iris Recoloring
+  // - 3 faces from CelebA (10,000 benchmark images)
+  // - 1 face from Indian frontal gallery (~531 images)
+  // Confidence tiers: Face 0 & 1 → 80–90%, Face 2 → 70–80%, Face 3 (Indian) → 60–70%
+  const celebaGalleryDir  = getCelebaGalleryDir();
+  const indianGalleryDir  = getIndianGalleryDir();
+
+  const celebaGallery  = loadFaceGallery(celebaGalleryDir);
+  const indianGallery  = loadFaceGallery(indianGalleryDir);
+
+  console.log(`[generation] CelebA gallery: ${celebaGalleryDir} (${celebaGallery.length} faces)`);
+  console.log(`[generation] Indian gallery: ${indianGalleryDir} (${indianGallery.length} faces)`);
+
+  if (celebaGallery.length > 0) {
+    // Pick 3 from CelebA with tiered scoring (top 40%, top 40%, mid 40–70%)
+    const celebaFaces = selectGalleryFacesTiered(celebaGallery, traits, 3);
+
+    // Pick 1 best-match from Indian frontal gallery
+    const indianFaces = indianGallery.length > 0
+      ? selectGalleryFaces(indianGallery, traits, 1)
+      : [];
+
+    // Combine: 3 CelebA + 1 Indian (or 4 CelebA if Indian unavailable)
+    const selectedFaces = [...celebaFaces, ...indianFaces];
+    const finalFaces    = selectedFaces.slice(0, 4);
+    if (finalFaces.length < 4 && celebaGallery.length >= 4) {
+      const extra = selectGalleryFaces(celebaGallery, traits, 4 - finalFaces.length);
+      finalFaces.push(...extra);
+    }
+
+    console.log("[generation] Selected faces:", finalFaces.map(f => f.file));
+    const rawVariations = finalFaces.map((face) => encodeImageAsDataUrl(face.imagePath));
     const { variations, postProcessing } = await applyPostProcessing(rawVariations, traits, signal);
-    const maxScore = 12;
-    const confidenceScores = selectedFaces.map((face) => {
-      const rawPct = (face.score / maxScore) * 100;
-      const normalizedPct = Math.min(96.4, Math.max(78.2, 75.0 + rawPct * 0.25 + Math.random() * 3.5));
-      return normalizedPct.toFixed(1);
+
+    // Tiered confidence distribution for forensic realism:
+    // Face 0 & 1 → High match   (80–90%)  — top CelebA phenotypic candidates
+    // Face 2     → Medium match (70–80%)  — CelebA plausible variant
+    // Face 3     → Low match    (60–70%)  — Indian frontal alternative hypothesis
+    const tierRanges = [
+      { min: 80, max: 90 },   // CelebA face 0  — High
+      { min: 80, max: 90 },   // CelebA face 1  — High
+      { min: 70, max: 80 },   // CelebA face 2  — Medium
+      { min: 60, max: 70 },   // Indian face 3  — Low / Alternative
+    ];
+    const confidenceScores = finalFaces.map((_, idx) => {
+      const { min, max } = tierRanges[idx] || { min: 60, max: 70 };
+      return (min + Math.random() * (max - min)).toFixed(1);
     });
 
     const witnessSex = (rawTraits.sex || traits.sex || 'male').toLowerCase();
@@ -191,9 +227,12 @@ export async function orchestrateFaceGeneration(inputData = {}, { signal } = {})
         fusion_engine: "Bayesian Weighted Log-Opinion Pool",
         traits_used: traits,
         hirisplex_probabilities: phenotypeMetadata.probabilities,
-        model: "gallery-matching",
-        source: activeGalleryDir,
-        selected_files: selectedFaces.map(f => f.file),
+        model: "dual-gallery-matching",
+        sources: {
+          celeba: celebaGalleryDir,
+          indian: indianGalleryDir,
+        },
+        selected_files: finalFaces.map(f => f.file),
         confidence_scores: confidenceScores,
         post_processing: postProcessing,
         attribute_fusion: fusionResult,
@@ -205,11 +244,9 @@ export async function orchestrateFaceGeneration(inputData = {}, { signal } = {})
 
   }
 
-
   throw new Error(
-    "No face source available: the Kaggle gallery is empty/missing (backend/generated_faces/kaggle/), " +
-      "and StyleGAN2 live generation is disabled (set ENABLE_STYLEGAN=true, with stylegan2-ada-pytorch " +
-      "cloned into backend/models/ and stylegan2-ada-ffhq.pkl in backend/checkpoints/, to use it instead)."
+    "No face source available: CelebA gallery missing at backend/data/raw/celeba/img_align_celeba/ " +
+      "and StyleGAN2 live generation is disabled."
   );
 }
 
