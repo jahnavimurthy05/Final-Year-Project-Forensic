@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Dna, ShieldCheck, Cpu, Eye, Sparkles } from 'lucide-react';
 
 const PIPELINE_STAGES = [
@@ -27,6 +27,13 @@ const PIPELINE_STAGES = [
     detail: 'Geometric iris segmentation, specular reflection preservation & recoloring',
     icon: Eye,
   },
+];
+
+const STAGE_BADGES = [
+  '01: DNA HELIX SCAN',
+  '02: BAYESIAN FUSION',
+  '03: STYLEGAN LATENT',
+  '04: 468 LANDMARKS LOCK',
 ];
 
 const TELEMETRY_LINES = [
@@ -105,71 +112,149 @@ export default function ForensicSynthesisLoader() {
         {/* ── Center Stage: Biometric Face HUD Scanner ──────────────────── */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-8 py-2 mb-6">
           {/* Biometric Hologram Reticle */}
-          <div className="relative w-44 h-44 sm:w-48 sm:h-48 flex-shrink-0 flex items-center justify-center">
+          <div className="relative w-48 h-48 sm:w-52 sm:h-52 flex-shrink-0 flex items-center justify-center">
             {/* Outer rotating dashed ring */}
-            <div className="absolute inset-0 rounded-full border-2 border-dashed border-teal-500/40 dark:border-cyan-400/50 animate-[spin_12s_linear_infinite]" />
+            <div className="absolute inset-0 rounded-full border-2 border-dashed border-teal-500/40 dark:border-cyan-400/50 animate-[spin_16s_linear_infinite]" />
 
-            {/* Inner counter-rotating ring */}
-            <div className="absolute inset-3 rounded-full border border-teal-600/30 dark:border-purple-400/40 animate-[spin_8s_linear_infinite_reverse]" />
+            {/* Inner counter-rotating calibrated ring */}
+            <div className="absolute inset-2.5 rounded-full border border-teal-600/30 dark:border-purple-400/40 animate-[spin_10s_linear_infinite_reverse]" />
 
-            {/* Corner HUD targeting brackets */}
-            <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-teal-600 dark:border-cyan-400" />
-            <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-teal-600 dark:border-cyan-400" />
-            <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-teal-600 dark:border-cyan-400" />
-            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-teal-600 dark:border-cyan-400" />
+            {/* Micro coordinate markers */}
+            <div className="absolute inset-0 flex items-center justify-between px-1 text-[8px] font-mono text-teal-600/50 dark:text-cyan-400/50 pointer-events-none select-none">
+              <span>270°</span>
+              <span>090°</span>
+            </div>
+            <div className="absolute inset-0 flex flex-col justify-between items-center py-1 text-[8px] font-mono text-teal-600/50 dark:text-cyan-400/50 pointer-events-none select-none">
+              <span>000°</span>
+              <span>180°</span>
+            </div>
 
-            {/* Center Biometric Face Silhouette & Landmark Nodes */}
-            <div className="relative w-32 h-36 flex items-center justify-center overflow-hidden rounded-xl bg-slate-100/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800">
-              {/* Stylized Face Mesh SVG */}
-              <svg className="w-24 h-28 text-teal-600 dark:text-cyan-400" viewBox="0 0 100 120" fill="none">
-                {/* Face contour */}
-                <path
-                  d="M 50 10 C 25 10 18 35 18 60 C 18 85 35 110 50 115 C 65 110 82 85 82 60 C 82 35 75 10 50 10 Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeOpacity="0.4"
-                  fill="none"
-                />
-                {/* Forehead & Temple mesh */}
-                <path d="M 30 35 L 50 25 L 70 35 L 50 45 Z" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.5" />
-                {/* Eye orbits */}
-                <ellipse cx="36" cy="50" rx="9" ry="5" stroke="currentColor" strokeWidth="1.2" strokeOpacity="0.7" />
-                <ellipse cx="64" cy="50" rx="9" ry="5" stroke="currentColor" strokeWidth="1.2" strokeOpacity="0.7" />
-                <circle cx="36" cy="50" r="3" fill="currentColor" fillOpacity="0.9" />
-                <circle cx="64" cy="50" r="3" fill="currentColor" fillOpacity="0.9" />
-                {/* Nose bridge & tip */}
-                <path d="M 50 45 L 47 68 L 53 68 Z" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" />
-                {/* Mouth lips */}
-                <path d="M 38 85 Q 50 81 62 85 Q 50 93 38 85 Z" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" />
-                {/* Key Landmark Nodes */}
-                <circle cx="50" cy="25" r="2" fill="#14b8a6" />
-                <circle cx="18" cy="60" r="2" fill="#14b8a6" />
-                <circle cx="82" cy="60" r="2" fill="#14b8a6" />
-                <circle cx="50" cy="115" r="2.5" fill="#00d2ff" />
-                <circle cx="50" cy="68" r="2" fill="#a855f7" />
-              </svg>
+            {/* Corner HUD targeting brackets with breathing animation */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              animate={{ scale: [1, 1.04, 1] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-teal-600 dark:border-cyan-400 shadow-[0_0_8px_#00d2ff]" />
+              <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-teal-600 dark:border-cyan-400 shadow-[0_0_8px_#00d2ff]" />
+              <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-teal-600 dark:border-cyan-400 shadow-[0_0_8px_#00d2ff]" />
+              <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-teal-600 dark:border-cyan-400 shadow-[0_0_8px_#00d2ff]" />
+            </motion.div>
+
+            {/* Center Biometric Face Viewfinder (ForenAI Authentic Brand Mark) */}
+            <motion.div
+              className="relative w-36 h-40 flex items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-b from-slate-900 via-slate-950 to-black border border-teal-500/50 dark:border-cyan-500/50 shadow-inner group"
+              animate={{
+                boxShadow: [
+                  '0 0 16px rgba(20,184,166,0.25), inset 0 0 20px rgba(20,184,166,0.15)',
+                  '0 0 28px rgba(0,210,255,0.45), inset 0 0 25px rgba(0,210,255,0.25)',
+                  '0 0 16px rgba(20,184,166,0.25), inset 0 0 20px rgba(20,184,166,0.15)',
+                ],
+              }}
+              transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              {/* Subtle holographic grid lines inside viewfinder */}
+              <div
+                className="absolute inset-0 opacity-20 pointer-events-none"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(rgba(20,184,166,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(20,184,166,0.3) 1px, transparent 1px)',
+                  backgroundSize: '12px 12px',
+                }}
+              />
+
+              {/* Stage-responsive glow aura behind the emblem */}
+              <motion.div
+                className="absolute inset-3 rounded-full filter blur-xl pointer-events-none"
+                animate={{
+                  backgroundColor:
+                    currentStage === 0
+                      ? 'rgba(20,184,166,0.28)'
+                      : currentStage === 1
+                      ? 'rgba(245,158,11,0.25)'
+                      : currentStage === 2
+                      ? 'rgba(168,85,247,0.28)'
+                      : 'rgba(0,210,255,0.32)',
+                  scale: [0.9, 1.15, 0.9],
+                }}
+                transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+              />
+
+              {/* Authentic ForenAI Logo Face Emblem with Smooth Floating & Shimmer */}
+              <motion.img
+                key="forenai-face-logo"
+                src={`${import.meta.env.BASE_URL}forenai-mark-transparent.png`}
+                alt="ForenAI Forensic Biometric Face"
+                className="w-28 h-28 object-contain filter drop-shadow-[0_0_14px_rgba(20,184,166,0.6)] z-10 select-none pointer-events-none"
+                animate={{
+                  scale: [0.97, 1.04, 0.97],
+                  y: [-3, 3, -3],
+                }}
+                transition={{
+                  duration: 3.6,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              />
+
+              {/* Stage 3 Ocular MediaPipe Landmark Calibration Crosshair */}
+              <AnimatePresence>
+                {currentStage === 3 && (
+                  <motion.div
+                    initial={{ scale: 2.2, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
+                    transition={{ duration: 0.5, type: 'spring' }}
+                    className="absolute top-[36%] right-[27%] w-6 h-6 -translate-y-1/2 translate-x-1/2 pointer-events-none z-20 flex items-center justify-center"
+                  >
+                    <div className="absolute inset-0 rounded-full border border-cyan-400 animate-ping opacity-75" />
+                    <div className="w-4 h-4 rounded-full border border-cyan-300" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-200 shadow-[0_0_6px_#00d2ff]" />
+                    <span className="absolute -top-3.5 right-0 text-[7px] font-mono font-bold text-cyan-300 bg-slate-900/90 px-1 rounded border border-cyan-500/40">
+                      #468
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Vertical Laser Scan Line Animation */}
               <motion.div
-                className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_12px_#00d2ff]"
+                className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_16px_#00d2ff,0_0_24px_#14b8a6] z-20 pointer-events-none"
                 animate={{
-                  top: ['5%', '92%', '5%'],
-                  opacity: [0.8, 1, 0.8],
+                  top: ['6%', '92%', '6%'],
+                  opacity: [0.75, 1, 0.75],
                 }}
                 transition={{
                   duration: 2.2,
                   repeat: Infinity,
                   ease: 'easeInOut',
                 }}
-              />
-            </div>
+              >
+                <div className="absolute inset-x-0 -top-3 h-3 bg-gradient-to-t from-cyan-400/20 to-transparent pointer-events-none" />
+              </motion.div>
+
+              {/* Smooth Stage Status Pill at bottom of viewfinder */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentStage}
+                  initial={{ opacity: 0, y: 6, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.9 }}
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                  className="absolute bottom-1.5 z-20 px-2 py-0.5 rounded-full text-[8.5px] font-mono font-bold tracking-wider uppercase backdrop-blur-md bg-slate-900/90 border border-teal-500/40 text-teal-300 shadow-sm flex items-center gap-1.5 select-none"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-ping" />
+                  <span>{STAGE_BADGES[currentStage]}</span>
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
 
             {/* Radar sweep beam */}
             <div
-              className="absolute inset-0 rounded-full pointer-events-none animate-[spin_3s_linear_infinite]"
+              className="absolute inset-0 rounded-full pointer-events-none animate-[spin_3.5s_linear_infinite]"
               style={{
                 background:
-                  'conic-gradient(from 0deg, transparent 0deg, transparent 300deg, rgba(20, 184, 166, 0.25) 360deg)',
+                  'conic-gradient(from 0deg, transparent 0deg, transparent 300deg, rgba(20, 184, 166, 0.22) 360deg)',
               }}
             />
           </div>
