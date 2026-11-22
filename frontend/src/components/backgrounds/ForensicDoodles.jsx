@@ -39,7 +39,7 @@ export default function ForensicDoodles() {
     ];
 
     let doodles = [];
-    const numDoodles = Math.min(36, Math.max(18, Math.floor((width * height) / 36000)));
+    const numDoodles = Math.min(32, Math.max(16, Math.floor((width * height) / 38000)));
 
     const initDoodles = () => {
       doodles = [];
@@ -47,15 +47,15 @@ export default function ForensicDoodles() {
         doodles.push({
           x: Math.random() * width,
           y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.45,
-          vy: (Math.random() - 0.5) * 0.45,
-          size: Math.random() * 16 + 26, // 26px - 42px
+          vx: (Math.random() - 0.5) * 0.42,
+          vy: (Math.random() - 0.5) * 0.42,
+          size: isLight ? Math.random() * 26 + 48 : Math.random() * 20 + 32, // 48px - 74px in light theme (larger & clearer)
           rotation: Math.random() * Math.PI * 2,
-          vRot: (Math.random() - 0.5) * 0.008,
+          vRot: (Math.random() - 0.5) * 0.007,
           type: DOODLE_TYPES[Math.floor(Math.random() * DOODLE_TYPES.length)],
-          baseAlpha: isLight ? Math.random() * 0.18 + 0.14 : Math.random() * 0.12 + 0.06,
-          // Color variety: forensic teal, navy blue, slate, and amber
-          colorIdx: Math.floor(Math.random() * 3),
+          baseAlpha: isLight ? Math.random() * 0.22 + 0.45 : Math.random() * 0.14 + 0.08, // Darker and crisp in light mode
+          // Color variety: deep forensic teal, cobalt, dark slate, indigo, and amber
+          colorIdx: Math.floor(Math.random() * 5),
         });
       }
     };
@@ -328,20 +328,24 @@ export default function ForensicDoodles() {
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Colors adapted for Light theme (slate/teal/sky/amber tones) and Dark theme
+      // Colors adapted for Light theme (deep rich slate/teal/cobalt/indigo/amber) and Dark theme
       const colors = isLight
         ? [
-            'rgba(13, 148, 136,',  // teal-600
-            'rgba(2, 132, 199,',   // sky-600
-            'rgba(71, 85, 105,',   // slate-600
+            'rgba(15, 118, 110,',  // Deep Forensic Teal (teal-700)
+            'rgba(3, 105, 161,',   // Deep Biometric Cobalt (sky-700)
+            'rgba(30, 41, 59,',    // Dark Forensic Slate (slate-800)
+            'rgba(67, 56, 202,',   // Forensic Indigo (indigo-700)
+            'rgba(180, 83, 9,',    // Forensic Evidence Amber (amber-700)
           ]
         : [
             'rgba(20, 184, 166,',  // teal-400
             'rgba(0, 210, 255,',   // cyan-400
             'rgba(148, 163, 184,', // slate-400
+            'rgba(168, 85, 247,',  // purple-400
+            'rgba(251, 191, 36,',  // amber-400
           ];
 
-      ctx.lineWidth = isLight ? 1.6 : 1.3;
+      ctx.lineWidth = isLight ? 2.5 : 1.5;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
@@ -436,7 +440,7 @@ export default function ForensicDoodles() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0 transition-opacity duration-500"
-      style={{ opacity: theme === 'light' ? 0.95 : 0.45 }}
+      style={{ opacity: theme === 'light' ? 1 : 0.5 }}
     />
   );
 }
