@@ -12,10 +12,16 @@ import EthicsPage from './pages/EthicsPage';
 import Navbar from './components/Navbar';
 import GlyphBackground from './components/backgrounds/GlyphBackground';
 import GravityStarsBackground from './components/backgrounds/GravityStarsBackground';
+import ForensicDoodles from './components/backgrounds/ForensicDoodles';
 
 function BackgroundRenderer() {
   const { bgEffect } = useTheme();
-  return bgEffect === 'glyph' ? <GlyphBackground /> : <GravityStarsBackground />;
+  return (
+    <>
+      {bgEffect === 'glyph' ? <GlyphBackground /> : <GravityStarsBackground />}
+      <ForensicDoodles />
+    </>
+  );
 }
 
 function AppContent() {
