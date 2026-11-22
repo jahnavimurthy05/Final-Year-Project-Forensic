@@ -64,8 +64,8 @@ export default function LandingPage() {
         </div>
         <div className="glass-panel p-8 rounded-2xl text-center">
           <div className="text-cyan-500 dark:text-cyan-400 text-4xl mb-4 font-mono font-bold">03</div>
-          <h3 className="text-xl font-bold mb-2 text-slate-900 dark:text-white">3D Particle Morphing</h3>
-          <p className="text-slate-600 dark:text-gray-400 text-sm leading-relaxed">Interactive Three.js particle dynamics morphing between the genetic globe and photographic composite.</p>
+          <h3 className="text-xl font-bold mb-2 text-slate-900 dark:text-white">AI Facial Composite Synthesis</h3>
+          <p className="text-slate-600 dark:text-gray-400 text-sm leading-relaxed">Neural face composite generation powered by StyleGAN2 W+ latent optimization and 468-point MediaPipe iris calibration.</p>
         </div>
       </motion.div>
     </div>
