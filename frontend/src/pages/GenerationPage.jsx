@@ -38,9 +38,9 @@ export default function GenerationPage() {
   const cv = fusion?.crossValidation;
 
   return (
-    <div className="p-6 sm:p-8 max-w-7xl mx-auto flex flex-col items-center">
+    <div className="py-6 px-4 sm:px-8 w-full max-w-[1650px] mx-auto flex flex-col items-center space-y-6">
       {/* ── Page Header ───────────────────────────────────────────────────── */}
-      <div className="text-center mb-6">
+      <div className="text-center mb-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 mb-2.5">
           <Layers className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
           <span>StyleGAN2 W+ &bull; MediaPipe Biometric Calibration</span>
@@ -86,7 +86,7 @@ export default function GenerationPage() {
 
       {/* ── HIrisPlex probability display (Classic Clean Card) ───────────────── */}
       {dnaState.probabilities && Object.keys(dnaState.probabilities).length > 0 && (
-        <div className="w-full max-w-3xl mb-7 rounded-2xl p-5 sm:p-6 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="w-full max-w-4xl mb-7 rounded-2xl p-5 sm:p-6 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-200 dark:border-slate-800">
             <span className="text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200 font-mono font-bold flex items-center gap-1.5">
               <Activity className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
