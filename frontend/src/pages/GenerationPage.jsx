@@ -4,7 +4,7 @@ import { generateFaceVariations } from '../services/api';
 import { useDna } from '../context/DnaContext';
 import LiquidButton from '../components/ui/LiquidButton';
 import ForensicSynthesisLoader from '../components/ui/ForensicSynthesisLoader';
-import { Sparkles, FileText, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Sparkles, FileText, CheckCircle2, AlertTriangle, Layers, Dna, Activity } from 'lucide-react';
 
 const HAIR_DOTS = { black: '#1a1a1a', brown: '#7b4f2e', blonde: '#d4a854', red: '#b03030', white: '#e2e8f0' };
 
@@ -39,68 +39,82 @@ export default function GenerationPage() {
 
   return (
     <div className="p-6 sm:p-8 max-w-7xl mx-auto flex flex-col items-center">
-      <h2 className="text-3xl sm:text-4xl font-extrabold mb-2 text-slate-900 dark:text-white neon-text text-center tracking-tight">
-        Multi-Modal Forensic Face Synthesis
-      </h2>
-      <p className="text-slate-600 dark:text-gray-400 mb-6 text-center max-w-2xl text-xs sm:text-sm font-mono leading-relaxed">
-        Attribute Fusion (Hair Evidence × HIrisPlex-S DNA) → StyleGAN2 W+ Latent Editing → MediaPipe Landmark Recoloring
-      </p>
+      {/* ── Page Header ───────────────────────────────────────────────────── */}
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-teal-500/10 text-teal-700 dark:text-cyan-400 border border-teal-500/30 mb-3 shadow-sm">
+          <Layers className="w-3.5 h-3.5" />
+          <span>StyleGAN2 W+ &bull; MediaPipe Biometric Calibration</span>
+        </div>
+        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white neon-text tracking-tight">
+          Multi-Modal Forensic Face Synthesis
+        </h2>
+        <p className="text-slate-600 dark:text-gray-400 text-xs sm:text-sm mt-1.5 font-mono leading-relaxed max-w-2xl mx-auto">
+          Attribute Fusion (Hair Evidence &times; HIrisPlex-S DNA) &rarr; StyleGAN2 W+ Latent Editing &rarr; MediaPipe Landmark Recoloring
+        </p>
+      </div>
 
-      {/* ── Pre-generation trait summary ─────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-3 sm:gap-4 justify-center items-center mb-6 glass-panel px-6 py-3.5 rounded-full border border-slate-300 dark:border-gray-700 shadow-sm">
-        <span className="text-xs sm:text-sm font-mono text-slate-800 dark:text-gray-200">
+      {/* ── Pre-generation trait summary pill ─────────────────────────────────── */}
+      <div className="flex flex-wrap gap-3 sm:gap-4 justify-center items-center mb-7 px-6 py-3.5 rounded-full bg-white/95 dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+        <span className="text-xs sm:text-sm font-mono text-slate-800 dark:text-gray-200 font-medium">
           Witness Sex: <strong className="text-amber-600 dark:text-amber-400 font-bold capitalize">{dnaState.traits.sex || 'Male'}</strong>
         </span>
-        <span className="text-slate-400 dark:text-gray-600">•</span>
-        <span className="text-xs sm:text-sm font-mono text-slate-800 dark:text-gray-200">
+        <span className="text-slate-300 dark:text-gray-700">&bull;</span>
+        <span className="text-xs sm:text-sm font-mono text-slate-800 dark:text-gray-200 font-medium">
           DNA Biological Sex:{' '}
           <strong className="text-purple-700 dark:text-purple-400 font-bold capitalize">
             {dnaState.traits.dnaSex || 'Male'} ({(dnaState.traits.dnaSex || 'male') === 'female' ? 'XX' : 'XY'})
           </strong>
         </span>
-        <span className="text-slate-400 dark:text-gray-600">•</span>
-        <span className="text-xs sm:text-sm font-mono text-slate-800 dark:text-gray-200">
+        <span className="text-slate-300 dark:text-gray-700">&bull;</span>
+        <span className="text-xs sm:text-sm font-mono text-slate-800 dark:text-gray-200 font-medium">
           Physical Hair:{' '}
           <span
-            className="inline-block w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-gray-500 mb-[-2px] mx-1 shadow-sm"
+            className="inline-block w-3 h-3 rounded-full border border-slate-400 dark:border-gray-500 mb-[-2px] mx-1 shadow-sm"
             style={{ backgroundColor: HAIR_DOTS[dnaState.traits.observedHairColor] || '#888' }}
           />
           <strong className="text-amber-600 dark:text-amber-400 font-bold capitalize">{dnaState.traits.observedHairColor || 'Black'}</strong>
         </span>
-        <span className="text-slate-400 dark:text-gray-600">•</span>
-        <span className="text-xs sm:text-sm font-mono text-slate-800 dark:text-gray-200">
+        <span className="text-slate-300 dark:text-gray-700">&bull;</span>
+        <span className="text-xs sm:text-sm font-mono text-slate-800 dark:text-gray-200 font-medium">
           Eye: <strong className="text-teal-700 dark:text-cyan-400 font-bold capitalize">{dnaState.traits.eyeColor || 'Brown'}</strong>
         </span>
-        <span className="text-slate-400 dark:text-gray-600">•</span>
-        <span className="text-xs sm:text-sm font-mono text-slate-800 dark:text-gray-200">
+        <span className="text-slate-300 dark:text-gray-700">&bull;</span>
+        <span className="text-xs sm:text-sm font-mono text-slate-800 dark:text-gray-200 font-medium">
           Skin: <strong className="text-teal-700 dark:text-cyan-400 font-bold capitalize">{dnaState.traits.skinTone || 'Medium'}</strong>
         </span>
       </div>
 
-      {/* ── HIrisPlex probability display ────────────────────────────────────── */}
+      {/* ── HIrisPlex probability display (Classic Clean Card) ───────────────── */}
       {dnaState.probabilities && Object.keys(dnaState.probabilities).length > 0 && (
-        <div className="w-full max-w-3xl mb-6 glass-panel p-5 rounded-2xl border border-teal-500/40 dark:border-cyan-500/30 shadow-md">
-          <h4 className="text-xs uppercase tracking-wider text-teal-800 dark:text-purple-300 font-mono font-bold mb-3 text-center">
-            HIrisPlex-S Validated Probability Profile (Modality 2 — Genomic)
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+        <div className="w-full max-w-3xl mb-7 relative rounded-2xl p-5 sm:p-6 bg-white/95 dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-[0_4px_25px_-5px_rgba(20,184,166,0.1)] overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-400 via-cyan-500 to-purple-500" />
+          <div className="flex items-center justify-between pb-2 mb-3.5 border-b border-slate-200/70 dark:border-slate-800/70">
+            <span className="text-xs uppercase tracking-wider text-teal-800 dark:text-cyan-300 font-mono font-bold flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-teal-600 dark:text-cyan-400" />
+              <span>HIrisPlex-S Validated Probability Profile</span>
+            </span>
+            <span className="text-[10px] font-mono text-slate-500 dark:text-gray-400">Modality 02 &bull; Genomic</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs font-mono">
             {Object.entries(dnaState.probabilities).map(([trait, probs]) => (
               <div
                 key={trait}
-                className="bg-slate-50/90 dark:bg-slate-900/90 p-3.5 rounded-xl border border-slate-200 dark:border-gray-800 shadow-sm"
+                className="bg-slate-50/90 dark:bg-slate-950/70 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-800/80 shadow-sm"
               >
-                <div className="text-teal-700 dark:text-cyan-400 font-extrabold capitalize mb-2 text-sm tracking-wide border-b border-slate-200 dark:border-gray-800 pb-1">
-                  {trait.replace('Color', ' Color').replace('Tone', ' Tone')}
+                <div className="text-teal-800 dark:text-cyan-400 font-bold capitalize mb-2 text-xs tracking-wide border-b border-slate-200/60 dark:border-slate-800/60 pb-1 flex justify-between items-center">
+                  <span>{trait.replace('Color', ' Color').replace('Tone', ' Tone')}</span>
+                  <span className="text-[9px] text-slate-400 dark:text-gray-500 font-normal">Prior</span>
                 </div>
                 {Object.entries(probs || {}).map(([val, prob]) => (
                   <div
                     key={val}
-                    className="flex justify-between items-center my-1.5 py-0.5 border-b border-slate-200/50 dark:border-gray-800/50 last:border-none"
+                    className="flex justify-between items-center my-1.5 py-0.5 border-b border-slate-200/40 dark:border-slate-800/40 last:border-none"
                   >
-                    <span className="capitalize text-slate-700 dark:text-gray-300 font-medium">
+                    <span className="capitalize text-slate-700 dark:text-gray-300 font-medium text-[11px]">
                       {val}
                     </span>
-                    <span className="text-slate-900 dark:text-cyan-300 font-extrabold text-sm">
+                    <span className="text-slate-950 dark:text-cyan-300 font-extrabold text-xs">
                       {(prob * 100).toFixed(1)}%
                     </span>
                   </div>
@@ -113,11 +127,11 @@ export default function GenerationPage() {
 
       {/* ── Generate button ───────────────────────────────────────────────────── */}
       {!isGenerating && images.length === 0 && (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center my-2">
           <LiquidButton
             onClick={generateFaces}
             variant="teal"
-            className="text-lg px-10 py-4 shadow-[0_0_25px_rgba(20,184,166,0.35)]"
+            className="text-base px-10 py-4 shadow-[0_0_25px_rgba(20,184,166,0.35)]"
             icon={<Sparkles className="w-5 h-5 text-teal-300" />}
           >
             Synthesize Suspect Composites
@@ -131,139 +145,179 @@ export default function GenerationPage() {
       {/* ── Results ───────────────────────────────────────────────────────────── */}
       {images.length > 0 && !isGenerating && (
         <div className="w-full mt-4">
-          {/* ── Multi-Modal Fusion Audit Card ─────────────────────────────────── */}
+
+          {/* ════════════════════════════════════════════════════════════════════
+              MULTI-MODAL FUSION AUDIT CARD (ELEVATED CLASSIC STYLE)
+          ════════════════════════════════════════════════════════════════════ */}
           {cv && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`w-full mb-6 p-5 rounded-2xl border shadow-md ${
-                cv.isConcordant
-                  ? 'border-emerald-500/40 bg-emerald-50/70 dark:bg-emerald-950/20'
-                  : 'border-rose-500/40 bg-rose-50/70 dark:bg-rose-950/20'
-              }`}
+              className="relative w-full mb-7 rounded-2xl p-6 bg-white/95 dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-[0_4px_25px_-5px_rgba(0,0,0,0.06)] overflow-hidden"
             >
-              <div className="flex flex-wrap items-start gap-6">
-                {/* Status badge */}
-                <div className="flex-1 min-w-[220px]">
-                  <div className="flex items-center gap-2 mb-2">
+              {/* Top Accent Ribbon */}
+              <div
+                className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${
+                  cv.isConcordant
+                    ? 'from-emerald-400 via-teal-500 to-cyan-500'
+                    : 'from-amber-400 via-rose-500 to-red-500'
+                }`}
+              />
+
+              {/* Header: Status Chip + Bayesian Weights Pill */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-200/80 dark:border-slate-800/80">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider ${
+                      cv.isConcordant
+                        ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30'
+                        : 'bg-rose-500/15 text-rose-800 dark:text-rose-300 border border-rose-500/30'
+                    }`}
+                  >
                     {cv.isConcordant ? (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                     ) : (
-                      <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                      <AlertTriangle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                     )}
-                    <span
-                      className={`font-bold font-mono text-sm ${
-                        cv.isConcordant
-                          ? 'text-emerald-700 dark:text-emerald-400'
-                          : 'text-rose-700 dark:text-rose-400'
-                      }`}
-                    >
-                      {cv.status}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-700 dark:text-gray-300 leading-relaxed font-medium">
-                    {cv.notes}
-                  </p>
-                </div>
-
-                {/* Modality comparison */}
-                <div className="flex gap-4 items-center flex-wrap">
-                  <div className="text-center">
-                    <div className="text-xs text-amber-700 dark:text-amber-400 font-mono uppercase tracking-wider mb-1 font-bold">
-                      Modality 1
-                    </div>
-                    <div className="text-[11px] text-slate-600 dark:text-gray-400 mb-1">
-                      Physical Hair Evidence
-                    </div>
-                    <div className="flex items-center gap-1.5 justify-center">
-                      <span
-                        className="w-4 h-4 rounded-full border border-slate-400 dark:border-gray-500 shadow-sm"
-                        style={{ backgroundColor: HAIR_DOTS[cv.physicalEvidence] || '#888' }}
-                      />
-                      <span className="text-slate-900 dark:text-white font-extrabold capitalize text-sm">
-                        {cv.physicalEvidence}
-                      </span>
-                    </div>
-                  </div>
-
-                  <span className="text-2xl text-slate-400 dark:text-gray-600 font-mono">
-                    {cv.isConcordant ? '=' : '≠'}
+                    <span>{cv.status}</span>
                   </span>
-
-                  <div className="text-center">
-                    <div className="text-xs text-purple-700 dark:text-purple-400 font-mono uppercase tracking-wider mb-1 font-bold">
-                      Modality 2
-                    </div>
-                    <div className="text-[11px] text-slate-600 dark:text-gray-400 mb-1">
-                      HIrisPlex-S DNA Prediction
-                    </div>
-                    <div className="flex items-center gap-1.5 justify-center">
-                      <span
-                        className="w-4 h-4 rounded-full border border-slate-400 dark:border-gray-500 shadow-sm"
-                        style={{ backgroundColor: HAIR_DOTS[cv.dnaTopPrediction] || '#888' }}
-                      />
-                      <span className="text-slate-900 dark:text-white font-extrabold capitalize text-sm">
-                        {cv.dnaTopPrediction}
-                      </span>
-                    </div>
-                  </div>
-
-                  <span className="text-slate-400 dark:text-gray-600 text-xl">→</span>
-
-                  <div className="text-center">
-                    <div className="text-xs text-teal-700 dark:text-cyan-400 font-mono uppercase tracking-wider mb-1 font-bold">
-                      Fused Output
-                    </div>
-                    <div className="text-[11px] text-slate-600 dark:text-gray-400 mb-1">
-                      Composite Phenotype
-                    </div>
-                    <div className="flex items-center gap-1.5 justify-center">
-                      <span
-                        className="w-4 h-4 rounded-full border border-slate-400 dark:border-gray-500 shadow-sm"
-                        style={{ backgroundColor: HAIR_DOTS[fusion.fusedHairColor] || '#888' }}
-                      />
-                      <span className="text-teal-700 dark:text-cyan-300 font-extrabold capitalize text-sm">
-                        {fusion.fusedHairColor} ({cv.confidence}%)
-                      </span>
-                    </div>
-                  </div>
                 </div>
 
-                {/* Fusion weights */}
-                {fusion.weights && (
-                  <div className="text-xs font-mono text-slate-700 dark:text-gray-400 text-right">
-                    <p className="font-semibold text-slate-900 dark:text-slate-300">Bayesian Weights</p>
-                    <p>
-                      DNA: <span className="text-purple-700 dark:text-purple-400 font-bold">{(fusion.weights.dna * 100).toFixed(0)}%</span>
-                    </p>
-                    <p>
-                      Hair: <span className="text-amber-700 dark:text-amber-400 font-bold">{(fusion.weights.hair * 100).toFixed(0)}%</span>
-                    </p>
+                {/* Bayesian Weights Badge */}
+                {fusion?.weights && (
+                  <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-lg text-xs font-mono bg-slate-50 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-300">
+                    <span className="text-slate-500 dark:text-gray-500 text-[11px]">Weights:</span>
+                    <span>
+                      DNA: <strong className="text-purple-700 dark:text-purple-400 font-bold">{(fusion.weights.dna * 100).toFixed(0)}%</strong>
+                    </span>
+                    <span className="text-slate-300 dark:text-gray-700">&bull;</span>
+                    <span>
+                      Physical: <strong className="text-amber-700 dark:text-amber-400 font-bold">{(fusion.weights.hair * 100).toFixed(0)}%</strong>
+                    </span>
                   </div>
                 )}
               </div>
 
-              {/* Fused probability mini-bars */}
-              {fusion.fusedProbabilities && (
-                <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
-                  {Object.entries(fusion.fusedProbabilities).map(([c, p]) => (
-                    <div key={c} className="text-center bg-white/70 dark:bg-slate-900/60 p-2 rounded-lg border border-slate-200/70 dark:border-slate-800">
-                      <div
-                        className="h-1.5 rounded-full bg-teal-500 dark:bg-cyan-400 mb-1 mx-auto"
-                        style={{ width: `${Math.round(p * 100)}%`, maxWidth: '100%', minWidth: '4px' }}
-                      />
-                      <span className="text-xs font-mono text-slate-700 dark:text-gray-300 capitalize font-medium">{c}</span>
-                      <span className="text-xs font-mono text-slate-950 dark:text-white font-extrabold ml-1">
-                        {(p * 100).toFixed(0)}%
+              {/* Explanatory notes */}
+              <p className="text-xs sm:text-sm text-slate-700 dark:text-gray-300 font-medium leading-relaxed mb-5">
+                {cv.notes}
+              </p>
+
+              {/* 3-Way Evidence Synthesis Pipeline Ledger */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+                {/* Modality 1 */}
+                <div className="p-3.5 rounded-xl bg-slate-50/90 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 block mb-0.5">
+                      Modality 01 (Physical)
+                    </span>
+                    <span className="text-xs text-slate-500 dark:text-gray-400">Hair Trace Evidence</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-gray-600 shadow-sm"
+                      style={{ backgroundColor: HAIR_DOTS[cv.physicalEvidence] || '#888' }}
+                    />
+                    <span className="text-slate-900 dark:text-white font-extrabold capitalize text-sm">
+                      {cv.physicalEvidence}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Modality 2 */}
+                <div className="p-3.5 rounded-xl bg-slate-50/90 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-700 dark:text-purple-400 block mb-0.5">
+                      Modality 02 (Genomic)
+                    </span>
+                    <span className="text-xs text-slate-500 dark:text-gray-400">HIrisPlex-S DNA Prior</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-gray-600 shadow-sm"
+                      style={{ backgroundColor: HAIR_DOTS[cv.dnaTopPrediction] || '#888' }}
+                    />
+                    <span className="text-slate-900 dark:text-white font-extrabold capitalize text-sm">
+                      {cv.dnaTopPrediction}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Fused Composite Output */}
+                <div className="p-3.5 rounded-xl bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-transparent border border-teal-500/40 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-teal-800 dark:text-cyan-400 block mb-0.5">
+                      Fused Composite Output
+                    </span>
+                    <span className="text-xs text-slate-500 dark:text-gray-400">Posterior Target</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-gray-600 shadow-sm"
+                      style={{ backgroundColor: HAIR_DOTS[fusion?.fusedHairColor] || '#888' }}
+                    />
+                    <span className="text-teal-800 dark:text-cyan-300 font-extrabold capitalize text-sm">
+                      {fusion?.fusedHairColor}{' '}
+                      <span className="text-xs font-normal text-slate-500 dark:text-gray-400">
+                        ({cv.confidence}%)
                       </span>
-                    </div>
-                  ))}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Refined Metric Gauges (The 4 Boxes) */}
+              {fusion?.fusedProbabilities && (
+                <div>
+                  <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2.5">
+                    Posterior Probability Distribution
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {Object.entries(fusion.fusedProbabilities).map(([c, p]) => {
+                      const pct = Math.round(p * 100);
+                      const isTop = c === fusion.fusedHairColor;
+                      return (
+                        <div
+                          key={c}
+                          className={`rounded-xl p-3.5 transition-all duration-200 border ${
+                            isTop
+                              ? 'bg-teal-50/80 dark:bg-slate-950/80 border-teal-500/50 shadow-sm'
+                              : 'bg-slate-50/80 dark:bg-slate-950/60 border-slate-200/80 dark:border-slate-800/80'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className="w-2.5 h-2.5 rounded-full border border-slate-300 dark:border-gray-600"
+                                style={{ backgroundColor: HAIR_DOTS[c] || '#888' }}
+                              />
+                              <span className="text-xs font-mono font-bold capitalize text-slate-800 dark:text-slate-200">
+                                {c}
+                              </span>
+                            </div>
+                            <span className="text-xs font-mono font-extrabold text-teal-800 dark:text-cyan-300">
+                              {pct}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <motion.div
+                              className="h-full rounded-full bg-gradient-to-r from-teal-500 to-cyan-400"
+                              initial={{ width: 0 }}
+                              animate={{ width: `${pct}%` }}
+                              transition={{ duration: 0.6, ease: 'easeOut' }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
-              <p className="text-[11px] text-slate-500 dark:text-gray-400 font-mono mt-3">
-                Engine: {fusion.fusionMethod}
-              </p>
+              <div className="mt-4 pt-3 border-t border-slate-200/70 dark:border-slate-800/70 flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-gray-400">
+                <span>Engine: {fusion?.fusionMethod}</span>
+                <span>468 MediaPipe FaceMesh Iris Calibration Active</span>
+              </div>
             </motion.div>
           )}
 
@@ -273,7 +327,7 @@ export default function GenerationPage() {
               <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white">Generated Suspect Variations</h3>
               {metadata?.model && (
                 <p className="text-xs font-mono text-teal-700 dark:text-purple-400 mt-1">
-                  Engine: {metadata.model} | Landmark: MediaPipe FaceMesh | Fusion: {metadata.fusion_engine}
+                  Engine: {metadata.model} &bull; Benchmark: 10,000 CelebA &plus; 513 Regional &bull; Fusion: {metadata.fusion_engine}
                 </p>
               )}
             </div>
@@ -282,7 +336,7 @@ export default function GenerationPage() {
                 setImages([]);
                 setMetadata(null);
               }}
-              className="text-xs font-mono px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 transition-colors"
+              className="text-xs font-mono px-3.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 transition-colors shadow-sm"
             >
               Clear &amp; Resynthesize
             </button>
@@ -290,10 +344,10 @@ export default function GenerationPage() {
 
           {/* ── Disguise Alert Banner ────────────────────────────────────────── */}
           {metadata?.disguise?.isDisguised && (
-            <div className="mb-6 p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 w-full text-left">
+            <div className="mb-6 p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 w-full text-left shadow-sm">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xl">🕵️</span>
-                <span className="font-bold font-mono text-sm text-amber-600 dark:text-amber-300">
+                <span className="font-bold font-mono text-sm text-amber-700 dark:text-amber-300">
                   DISGUISE DETECTED: {metadata.disguise.message}
                 </span>
               </div>
@@ -303,7 +357,7 @@ export default function GenerationPage() {
                   {metadata.disguise.dnaSex} ({metadata.disguise.dnaAmelogenin})
                 </strong>
                 , while witness observation documented{' '}
-                <strong className="text-amber-600 dark:text-amber-300 capitalize">
+                <strong className="text-amber-700 dark:text-amber-300 capitalize">
                   {metadata.disguise.witnessSex} presentation
                 </strong>
                 .
@@ -319,7 +373,7 @@ export default function GenerationPage() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: idx * 0.15 }}
-                className="glass-panel p-4 rounded-2xl flex flex-col justify-between items-center relative group border border-slate-200 dark:border-gray-800 hover:border-teal-500/60 dark:hover:border-cyan-400/60 shadow-lg transition-all h-full"
+                className="relative rounded-2xl p-4 bg-white/95 dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 hover:border-teal-500/60 dark:hover:border-cyan-400/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_30px_-5px_rgba(20,184,166,0.2)] transition-all h-full flex flex-col justify-between items-center group overflow-hidden"
               >
                 {/* Confidence Badge */}
                 <div className="absolute top-3 right-3 bg-slate-900/90 text-teal-300 font-mono font-bold px-2.5 py-1 rounded-md text-xs border border-teal-500/40 shadow-sm z-10">
@@ -428,7 +482,7 @@ export default function GenerationPage() {
                 <p className="mt-1 text-slate-800 dark:text-gray-200">
                   Fused Output:{' '}
                   <strong className="text-teal-700 dark:text-cyan-400 capitalize">
-                    {fusion.fusedHairColor}
+                    {fusion?.fusedHairColor}
                   </strong>{' '}
                   ({cv.confidence}% confidence)
                 </p>
