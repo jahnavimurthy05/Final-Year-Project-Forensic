@@ -14,15 +14,15 @@ export default function LiquidButton({
 
   const variants = {
     teal: {
-      border: 'border-2 border-teal-500 hover:border-teal-400 dark:border-teal-400/70',
-      bgBase: 'bg-teal-50/95 dark:bg-slate-900/90',
-      liquidGradient: 'from-teal-700 via-teal-500 to-cyan-400',
-      liquidBaseColor: 'bg-teal-600/20 dark:bg-teal-500/15',
-      waveColor1: 'text-white/50 fill-current',
-      waveColor2: 'text-cyan-200/40 fill-current',
+      border: 'border border-teal-600 hover:border-teal-500 dark:border-teal-400/70',
+      bgBase: 'bg-teal-50/90 dark:bg-slate-900/90',
+      liquidGradient: 'from-teal-800 via-teal-600 to-teal-500',
+      liquidBaseColor: 'bg-teal-600/15 dark:bg-teal-500/15',
+      waveColor1: 'text-white/40 fill-current',
+      waveColor2: 'text-teal-200/30 fill-current',
       textIdle: 'text-teal-950 dark:text-teal-100',
       textHover: 'text-white',
-      glow: 'shadow-[0_4px_16px_rgba(20,184,166,0.25)] hover:shadow-[0_8px_28px_rgba(20,184,166,0.5)]',
+      glow: 'shadow-sm hover:shadow-md',
     },
     purple: {
       border: 'border-2 border-purple-500 hover:border-purple-400 dark:border-purple-400/70',

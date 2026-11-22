@@ -26,7 +26,7 @@ export default function Navbar() {
         />
         <div className="flex flex-col text-left">
           <span className="text-xl font-black tracking-wider text-slate-900 dark:text-white leading-tight">
-            Foren<span className="text-cyan-500 dark:text-cyan-400">AI</span>
+            Foren<span className="text-teal-600 dark:text-teal-400">AI</span>
           </span>
           <span className="text-[8px] font-mono tracking-widest text-slate-500 dark:text-gray-400 uppercase">
             DNA &bull; ANALYZE &bull; RECONSTRUCT
@@ -37,11 +37,11 @@ export default function Navbar() {
       {/* Nav links — only shown when logged in */}
       {token && (
         <div className="hidden md:flex gap-6 items-center font-medium text-sm text-slate-700 dark:text-slate-300">
-          <Link to="/home"      className="hover:text-teal-600 dark:hover:text-cyan-400 transition-colors">Home</Link>
-          <Link to="/dna-input" className="hover:text-teal-600 dark:hover:text-cyan-400 transition-colors">DNA &amp; Traits</Link>
-          <Link to="/generate"  className="hover:text-teal-600 dark:hover:text-cyan-400 transition-colors">Generate</Link>
-          <Link to="/dashboard" className="hover:text-teal-600 dark:hover:text-cyan-400 transition-colors text-cyan-600 dark:text-cyberPurple font-semibold">Dashboard</Link>
-          <Link to="/ethics"    className="hover:text-teal-600 dark:hover:text-cyan-400 transition-colors">Ethics</Link>
+          <Link to="/home"      className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Home</Link>
+          <Link to="/dna-input" className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">DNA &amp; Traits</Link>
+          <Link to="/generate"  className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Generate</Link>
+          <Link to="/dashboard" className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors text-teal-700 dark:text-teal-300 font-semibold">Dashboard</Link>
+          <Link to="/ethics"    className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Ethics</Link>
         </div>
       )}
 

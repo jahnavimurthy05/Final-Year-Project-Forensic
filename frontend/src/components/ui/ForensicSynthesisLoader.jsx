@@ -167,14 +167,7 @@ export default function ForensicSynthesisLoader() {
               <motion.div
                 className="absolute inset-3 rounded-full filter blur-xl pointer-events-none"
                 animate={{
-                  backgroundColor:
-                    currentStage === 0
-                      ? 'rgba(20,184,166,0.28)'
-                      : currentStage === 1
-                      ? 'rgba(245,158,11,0.25)'
-                      : currentStage === 2
-                      ? 'rgba(168,85,247,0.28)'
-                      : 'rgba(0,210,255,0.32)',
+                  backgroundColor: 'rgba(20, 184, 166, 0.22)',
                   scale: [0.9, 1.15, 0.9],
                 }}
                 transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
@@ -336,9 +329,9 @@ export default function ForensicSynthesisLoader() {
             </span>
             <span className="text-teal-700 dark:text-cyan-400 text-sm">{progress}%</span>
           </div>
-          <div className="w-full h-3 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-300 dark:border-slate-700">
+          <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-300 dark:border-slate-700">
             <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-teal-500 via-cyan-400 to-purple-500 shadow-[0_0_12px_rgba(20,184,166,0.6)]"
+              className="h-full rounded-full bg-teal-600 dark:bg-teal-400"
               initial={{ width: '12%' }}
               animate={{ width: `${progress}%` }}
               transition={{ ease: 'easeOut', duration: 0.3 }}

@@ -53,9 +53,9 @@ export default function ForensicDoodles() {
           rotation: Math.random() * Math.PI * 2,
           vRot: (Math.random() - 0.5) * 0.007,
           type: DOODLE_TYPES[Math.floor(Math.random() * DOODLE_TYPES.length)],
-          baseAlpha: isLight ? Math.random() * 0.22 + 0.45 : Math.random() * 0.14 + 0.08, // Darker and crisp in light mode
-          // Color variety: deep forensic teal, cobalt, dark slate, indigo, and amber
-          colorIdx: Math.floor(Math.random() * 5),
+          baseAlpha: isLight ? Math.random() * 0.15 + 0.35 : Math.random() * 0.10 + 0.08,
+          // Disciplined 2-tone palette: Forensic Charcoal Slate and Brand Teal
+          colorIdx: Math.floor(Math.random() * 2),
         });
       }
     };
@@ -328,24 +328,18 @@ export default function ForensicDoodles() {
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Colors adapted for Light theme (deep rich slate/teal/cobalt/indigo/amber) and Dark theme
+      // Disciplined 2-tone palette matching brand identity (Forensic Slate & Brand Teal)
       const colors = isLight
         ? [
-            'rgba(15, 118, 110,',  // Deep Forensic Teal (teal-700)
-            'rgba(3, 105, 161,',   // Deep Biometric Cobalt (sky-700)
-            'rgba(30, 41, 59,',    // Dark Forensic Slate (slate-800)
-            'rgba(67, 56, 202,',   // Forensic Indigo (indigo-700)
-            'rgba(180, 83, 9,',    // Forensic Evidence Amber (amber-700)
+            'rgba(30, 41, 59,',    // Forensic Charcoal Slate (slate-800)
+            'rgba(15, 118, 110,',  // Brand Forensic Teal (teal-700)
           ]
         : [
-            'rgba(20, 184, 166,',  // teal-400
-            'rgba(0, 210, 255,',   // cyan-400
-            'rgba(148, 163, 184,', // slate-400
-            'rgba(168, 85, 247,',  // purple-400
-            'rgba(251, 191, 36,',  // amber-400
+            'rgba(148, 163, 184,', // Muted Slate (slate-400)
+            'rgba(20, 184, 166,',  // Brand Forensic Teal (teal-400)
           ];
 
-      ctx.lineWidth = isLight ? 2.5 : 1.5;
+      ctx.lineWidth = isLight ? 2.2 : 1.4;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
